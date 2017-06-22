@@ -51,7 +51,8 @@ module storm_module
     type(holland_storm_type), save :: holland_storm
     type(constant_storm_type), save :: constant_storm
     type(stommel_storm_type), save :: stommel_storm
-
+    type(cle_storm_type), save :: cle_storm 
+    
     ! Wind drag maximum limit
     real(kind=8), parameter :: WIND_DRAG_LIMIT = 2.d-3
 
@@ -78,6 +79,7 @@ contains
         use holland_storm_module, only: set_holland_storm
         use constant_storm_module, only: set_constant_storm
         use stommel_storm_module, only: set_stommel_storm
+        use cle_storm_module, only: set_cle_storm
 
         use geoclaw_module, only: pi
 
@@ -177,6 +179,9 @@ contains
             else if (storm_type == 3) then
                 ! Stommel wind field
                 call set_stommel_storm(storm_file_path,stommel_storm,log_unit)
+            else if (storm_type == 4) then
+                ! Stommel wind field
+                call set_cle_storm(storm_file_path,cle_storm,log_unit)
             else
                 print *,"Invalid storm type ",storm_type," provided."
                 stop
@@ -376,6 +381,7 @@ contains
         use holland_storm_module, only: set_holland_storm_fields
         use constant_storm_module, only: set_constant_storm_fields
         use stommel_storm_module, only: set_stommel_storm_fields
+        use cle_storm_module, only: set_cle_storm_fields
 
         implicit none
 
@@ -399,6 +405,10 @@ contains
                 call set_stommel_storm_fields(maux,mbc,mx,my, &
                                     xlower,ylower,dx,dy,t,aux, wind_index, &
                                     pressure_index, stommel_storm)
+            case(4)
+                call set_cle_storm_fields(maux,mbc,mx,my, &
+                                    xlower,ylower,dx,dy,t,aux, wind_index, &
+                                    pressure_index, cle_storm)
         end select
 
     end subroutine set_storm_fields

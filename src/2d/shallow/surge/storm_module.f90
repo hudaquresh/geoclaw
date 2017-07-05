@@ -13,6 +13,7 @@ module storm_module
     use holland_storm_module, only: holland_storm_type
     use constant_storm_module, only: constant_storm_type
     use stommel_storm_module, only: stommel_storm_type
+    use cle_storm_module, only: cle_storm_type
 
     implicit none
 

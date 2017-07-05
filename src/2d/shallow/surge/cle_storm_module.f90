@@ -24,8 +24,6 @@ module cle_storm_module
         real(kind=8), allocatable :: track(:,:) 
 
         ! Storm physics 
-        real(kind=8) :: ambient_pressure = 101.3d3 ! Pascals 
-        real(kind=8) :: rho_air
         real(kind=8), allocatable :: max_wind_radius(:)
         real(kind=8), allocatable :: max_wind_speed(:)
         real(kind=8), allocatable :: central_pressure(:)
@@ -726,7 +724,7 @@ contains
                                     ylower,dx,dy,t,aux, wind_index, &
                                     pressure_index, storm)
 
-        use geoclaw_module, only: g => grav
+        use geoclaw_module, only: g => grav, ambient_pressure
         use geoclaw_module, only: coriolis, deg2rad
         use geoclaw_module, only: spherical_distance
 

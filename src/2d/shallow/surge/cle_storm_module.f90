@@ -27,6 +27,7 @@ module cle_storm_module
         real(kind=8), allocatable :: max_wind_radius(:)
         real(kind=8), allocatable :: max_wind_speed(:)
         real(kind=8), allocatable :: central_pressure(:)
+        real(kind=8), allocatable :: ambient_pressure(:)
         real(kind=8), allocatable :: rrp(:) 
 
         ! Approximate velocity of storm, approximated via the track points
@@ -763,7 +764,7 @@ contains
         !First, interpolate all of the relevant tracked storm parameters.
         i = storm_index(t, storm)
         tv = storm%velocity(:, i)
-        Pa = storm%ambient_pressure
+        Pa = ambient_pressure
         sloc = cle_storm_location(t, storm)
         f = coriolis(sloc(2))
         Pc = storm%central_pressure(i)

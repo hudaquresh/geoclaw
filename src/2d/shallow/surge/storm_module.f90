@@ -329,6 +329,7 @@ contains
 
         use holland_storm_module, only: holland_storm_location
         use constant_storm_module, only: constant_storm_location
+        use cle_storm_module, only: cle_storm_location 
 
         implicit none
 
@@ -347,6 +348,8 @@ contains
                 location = constant_storm_location(t,constant_storm)
             case(3)
                 location = [rinfinity,rinfinity]
+            case(4)
+                location = cle_storm_location(t,cle_storm)
         end select
 
     end function storm_location
@@ -356,6 +359,7 @@ contains
         use amr_module, only: rinfinity
         use holland_storm_module, only: holland_storm_direction
         use constant_storm_module, only: constant_storm_direction
+        use cle_storm_module, only: cle_storm_direction
 
         implicit none
 
@@ -371,6 +375,8 @@ contains
                 theta = constant_storm_direction(t,constant_storm)
             case(3)
                 theta = rinfinity
+            case(4)
+                theta = cle_storm_direction(t,cle_storm) 
         end select
 
     end function storm_direction

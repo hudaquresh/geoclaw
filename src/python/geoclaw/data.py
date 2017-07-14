@@ -416,7 +416,7 @@ class SurgeData(clawpack.clawutil.data.ClawData):
 
         self.data_write('storm_file',description="(Location of storm data)")
 
-        if self.storm_type == 0 or self.storm_type == 1:
+        if self.storm_type == 0 or self.storm_type == 1 or self.storm_type == 4:
             pass 
         elif self.storm_type == 2:
             # Open another data file called stored in storm_file and write the 
@@ -433,11 +433,6 @@ class SurgeData(clawpack.clawutil.data.ClawData):
             # following parameters to it
             self.open_data_file(self.storm_file)
             self.data_write("stommel_wind",description="(Amplitude of Stommel wind)")
-        elif self.storm_type == 4: 
-            # Open another data file called stored in storm_file and write the 
-            # following parameters to it
-            self.open_data_file(self.storm_file)
-            self.data_write("cle_wind",description="TheoreticalProfile")
         else:
             raise ValueError("Invalid storm type %s." % self.storm_type)
 

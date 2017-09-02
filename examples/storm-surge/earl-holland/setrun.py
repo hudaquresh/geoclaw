@@ -16,8 +16,8 @@ import numpy as np
 
 # Calculate landfall time
 # Landfall for Ike in Houston was September 13th, at ~ 7:00:00 UTC
-landfall = datetime.datetime(2008, 9, 13, 7) - \
-           datetime.datetime(2008, 1, 1, 0)
+landfall = datetime.datetime(2016, 8, 4, 12) - \
+           datetime.datetime(2016, 1, 1, 0)
 
 # Time Conversions
 def days2seconds(days):
@@ -99,7 +99,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = days2seconds(landfall.days - 3) + landfall.seconds
+    clawdata.t0 = days2seconds(landfall.days - 1) + landfall.seconds
     # clawdata.t0 = days2seconds(landfall.days - 1) + landfall.seconds
 
     # Restart from checkpoint file of a previous run?
@@ -418,7 +418,7 @@ def setgeo(rundata):
 
     # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-                                         'ike.storm'))
+                                         'earl.storm'))
 
     # =======================
     #  Set Variable Friction

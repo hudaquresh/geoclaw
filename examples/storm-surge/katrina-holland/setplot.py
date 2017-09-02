@@ -48,9 +48,9 @@ def setplot(plotdata=None):
     track = surgeplot.track_data(os.path.join(plotdata.outdir, 'fort.track'))
 
     # Calculate landfall time
-    # Landfall for Ike in Houston was September 13th, at 7 UTC
-    landfall_dt = datetime.datetime(2008, 9, 13, 7) - \
-                  datetime.datetime(2008, 1, 1,  0)
+    # Landfall for Katrina 
+    landfall_dt = datetime.datetime(2005, 8, 29, 6) - \
+                  datetime.datetime(2005, 1, 1,  0)
     landfall = landfall_dt.days * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function

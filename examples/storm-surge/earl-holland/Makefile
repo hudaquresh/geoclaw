@@ -66,9 +66,9 @@ gulf_caribbean.tt3:
 topo: gulf_caribbean.tt3
 
 -all:
-	$(MAKE) topo > topo.txt 
-	$(MAKE) .plots > plots.txt 
-	$(MAKE) .htmls > html.txt 
+	$(MAKE) topo
+	$(MAKE) .plots
+	$(MAKE) .htmls
 
 
 ### DO NOT remove this line - make depends on it ###

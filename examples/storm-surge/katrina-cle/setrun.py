@@ -317,16 +317,20 @@ def setrun(claw_pkg='geoclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     # Gauges from Ike AWR paper (2011 Dawson et al)
-    rundata.gaugedata.gauges.append([1, -95.04, 29.07,
+    # Pilots Station 
+    rundata.gaugedata.gauges.append([1, -89.07, 28.93,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([2, -94.71, 29.28,
+    # Grand Isle LA 
+    rundata.gaugedata.gauges.append([2, -89.95, 29.26,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([3, -94.39, 29.49,
+    
+    rundata.gaugedata.gauges.append([3, -87.7, 25.2,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([4, -94.13, 29.58,
+
+    rundata.gaugedata.gauges.append([4, -88.7, 26.26,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
 

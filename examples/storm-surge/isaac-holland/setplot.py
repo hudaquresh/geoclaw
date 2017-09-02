@@ -48,9 +48,9 @@ def setplot(plotdata=None):
     track = surgeplot.track_data(os.path.join(plotdata.outdir, 'fort.track'))
 
     # Calculate landfall time
-    # Landfall for Ike in Houston was September 13th, at 7 UTC
-    landfall_dt = datetime.datetime(2008, 9, 13, 7) - \
-                  datetime.datetime(2008, 1, 1,  0)
+    # Landfall for Isaac in 
+    landfall_dt = datetime.datetime(2012, 8, 28, 21) - \
+                  datetime.datetime(2012, 1, 1,  0)
     landfall = landfall_dt.days * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
@@ -98,7 +98,7 @@ def setplot(plotdata=None):
                                "ylimits": (27.5, 30.5),
                                "figsize": (8, 2.7)}}
 
-    for (name, region_dict) in regions.iteritems():
+    for (name, region_dict) in regions.items():
 
         # Surface Figure
         plotfigure = plotdata.new_plotfigure(name="Surface - %s" % name)
@@ -231,8 +231,8 @@ def setplot(plotdata=None):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    plotaxes.xlimits = [-95.5, -94]
-    plotaxes.ylimits = [29.0, 30.0]
+    plotaxes.xlimits = [-95.50, -94.00]
+    plotaxes.ylimits = [28.50, 30.00]
     plotaxes.afteraxes = gauge_location_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
     add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks,

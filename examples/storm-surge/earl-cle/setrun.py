@@ -15,9 +15,9 @@ import datetime
 import numpy as np
 
 # Calculate landfall time
-# Landfall for Isaac
-landfall = datetime.datetime(2012, 8, 28, 21) - \
-           datetime.datetime(2012, 1, 1, 0)
+# Landfall for Ike in Houston was September 13th, at ~ 7:00:00 UTC
+landfall = datetime.datetime(2016, 8, 4, 12) - \
+           datetime.datetime(2016, 1, 1, 0)
 
 # Time Conversions
 def days2seconds(days):
@@ -99,7 +99,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = days2seconds(landfall.days - 3) + landfall.seconds
+    clawdata.t0 = days2seconds(landfall.days - 1) + landfall.seconds
     # clawdata.t0 = days2seconds(landfall.days - 1) + landfall.seconds
 
     # Restart from checkpoint file of a previous run?
@@ -316,17 +316,17 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    # Gauges from Isaac, randomly picked from storm file
-    rundata.gaugedata.gauges.append([1, -87.70, 27.40,
+    # Gauges from Ike AWR paper (2011 Dawson et al)
+    rundata.gaugedata.gauges.append([1, -95.04, 29.07,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([2, -85.0, 26.0,
+    rundata.gaugedata.gauges.append([2, -94.71, 29.28,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([3, -90.8, 29.5,
+    rundata.gaugedata.gauges.append([3, -94.39, 29.49,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([4, -92.0, 31.0,
+    rundata.gaugedata.gauges.append([4, -94.13, 29.58,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
 
@@ -411,16 +411,16 @@ def setgeo(rundata):
     data.wind_refine = [20.0, 40.0, 60.0]
     data.R_refine = [60.0e3, 40e3, 20e3]
 
-    ## Storm parameters - Parameterized storm (Holland 1980)
+    # Storm parameters - Parameterized storm (Holland 1980)
     #data.storm_type = 1
-    # Storm parameters - Theoretical storm (CLE 2015) 
+    # Storm parameters - Parameterized storm (CLE 2015)
     data.storm_type = 4
     data.landfall = days2seconds(landfall.days) + landfall.seconds
     data.display_landfall_time = True
 
     # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-                                         'isaac.storm'))
+                                         'earl.storm'))
 
     # =======================
     #  Set Variable Friction

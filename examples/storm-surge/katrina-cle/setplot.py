@@ -14,6 +14,7 @@ import clawpack.clawutil.data as clawutil
 import clawpack.amrclaw.data as amrclaw
 import clawpack.geoclaw.data as geodata
 
+from clawpack.pyclaw.gauges import GaugeSolution
 
 import clawpack.geoclaw.surge.plot as surgeplot
 
@@ -226,7 +227,7 @@ def setplot(plotdata=None):
 
     plotfigure = plotdata.new_plotfigure(name="Gauge Locations")
     plotfigure.show = True
-
+    
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'

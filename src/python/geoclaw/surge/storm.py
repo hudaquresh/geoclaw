@@ -734,7 +734,7 @@ class Storm(object):
                                  self.storm_radius[n],
                                  "\n"))
 
-    def write_hurdat(self, path):
+    def write_atcf(self, path):
         r"""Write out a HURDAT formatted storm file
 
         :Input:
@@ -742,24 +742,14 @@ class Storm(object):
         """
         with open(path, 'w') as data_file:
             for n in range(self.t.shape[0]):
-                data_file.write("".join((", " * 2,
-                                         "%s" % self.seconds2date(self.t[n]),
-                                         ", " * 4,
-                                         "%s" % (int(self.eye_location[n, 0] *
-                                                     10.0)),
-                                         ", ",
-                                         "%s" % (int(self.eye_location[n, 1] *
-                                                     10.0)),
-                                         ", ",
-                                         "%s" % self.max_wind_speed[n],
-                                         ", ",
-                                         "%s" % self.central_pressure[n],
-                                         ", ",
-                                         ", " * 8,
-                                         "%s" % self.storm_radius[n],
-                                         ", ",
-                                         "%s" % self.max_wind_radius[n],
-                                         ", " * 10,
+                data_file.write("".join(("," * 7,
+                                         "%s" %(int(self.max_wind_speed[i])),
+                                         ",", 
+                                         "%s" %(int(self.central_pressure[i])),
+                                         "," * 10,
+                                         "%s" %(int(self.max_wind_radius[i])), 
+                                         ",", 
+                                         "%s" %(int(self.storm_radius[i])), 
                                          "\n")))
 
     def write_hurdat2(self, path):

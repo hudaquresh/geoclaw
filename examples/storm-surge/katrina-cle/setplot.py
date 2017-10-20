@@ -232,8 +232,8 @@ def setplot(plotdata=None):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    plotaxes.xlimits = [-95.5, -94]
-    plotaxes.ylimits = [29.0, 30.0]
+    plotaxes.xlimits = [-86, -91]
+    plotaxes.ylimits = [25, 30.0]
     plotaxes.afteraxes = gauge_location_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
     add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks,

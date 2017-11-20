@@ -571,8 +571,11 @@ contains
         ! aux(wind_index:wind_index+1,:,:) = 0.d0
         ! aux(pressure_index,:,:) = Pa
        
-        Bs = (mod_mws**2.d0) * (rho_air * exp(1.d0))/(dp) 
+        Bs = (mod_mws**2.d0) * (rho_air * exp(1.d0))/(dp)
         !Bs = (mws**2.d0) * (rho_air * exp(1.d0))/(100*dp) 
+ 
+        if (Bs <  1.d0) Bs = 1.d0
+        if (Bs > 2.5d0) Bs = 2.5d0
     
         dg = (mwr/rrp)**Bs 
         edg = exp(-1.d0*dg) 

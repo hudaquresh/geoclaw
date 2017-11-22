@@ -494,26 +494,9 @@ contains
 
     end subroutine get_holland10_storm_data
 
-!    ! ==========================================================================
-!    !  get_e04_wind()
-!    ! ==========================================================================
-!    subroutine get_e04_wind(r0, rmin, f, N)
-!        
-!        implicit none 
-!    
-!        real(kind=8) :: r0, rmin, f, N
-!        integer :: i,j
-!        
-!        real(kind=8), allocatable :: max_wind_radius(:)
-!        real(kind=8), allocatable :: max_wind_speed(:)
-!        real(kind=8), allocatable :: central_pressure(:)
-!        real(kind=8), allocatable :: rrp(:)
-!        
-!
-!    end subroutine get_e04_wind
     
     ! ==========================================================================
-    !  set_holland10_storm_fields()
+    !  set_holland_storm_fields()
     ! ==========================================================================
     subroutine set_holland10_storm_fields(maux,mbc,mx,my,xlower, &
                                     ylower,dx,dy,t,aux, wind_index, &
@@ -543,7 +526,7 @@ contains
         real(kind=8) :: x, y, r, theta, sloc(2)
         real(kind=8) :: f, mwr, mws, Pc, Pa, dp, wind, tv(2), rrp
         real(kind=8) :: mod_mws, trans_speed, ramp
-        real(kind=8) :: xx, xn, rn, vn, dg, edg, rg 
+        real(kind=8) :: rn, dg, edg, rg, vn, xn, xx 
         integer :: i,j
 
         ! Get interpolated storm data
@@ -567,29 +550,50 @@ contains
         ! really should have better ambient pressure...
         if (dp < 100.d0) dp = 100.d0
 
-       !! Set initial wind and pressure field, do not really need to do this
-        ! aux(wind_index:wind_index+1,:,:) = 0.d0
-        ! aux(pressure_index,:,:) = Pa
-       
-        Bs = (mod_mws**2.d0) * (rho_air * exp(1.d0))/(dp)
-        !Bs = (mws**2.d0) * (rho_air * exp(1.d0))/(100*dp) 
- 
-        if (Bs <  1.d0) Bs = 1.d0
-        if (Bs > 2.5d0) Bs = 2.5d0
-    
-        dg = (mwr/rrp)**Bs 
-        edg = exp(-1.d0*dg) 
-        rg = 100 * Bs * dp * dg * edg/rho_air 
+!       # Holland 2010 Model 
+        ! Calculate Holland parameters and limit the result
+        B = rho_air * exp(1.d0) * (mod_mws**2) / (dp)
+        !! Using equation 6 with mws
         rn = rrp  
-        vn = 12  
-        xn = log(vn)/log(rg) 
+        dg = (mwr/rn)**B 
+        edg = exp(1.d0-dg) 
+        rg = dg * edg/rho_air 
+        vn = 5  
+        xn = log(vn/mws)/log(rg)
 
-        !if (DEBUG) print "('Holland B = ',d16.8)",B
-        !if (DEBUG) print "('Holland A = ',d16.8)",(mwr / 1000.d0)**B
+
+        !! Using equation 6 without mws 
+        !dg = (mwr/rrp)**B 
+        !edg = exp(-1.d0*dg) 
+        !rg = B * dp * dg * edg/rho_air 
+        !rn = rrp  
+        !vn = 5  
+        !xn = log(vn)/log(rg) 
+
+        if (DEBUG) print "('Holland B = ',d16.8)",B
+        if (DEBUG) print "('Holland A = ',d16.8)",(mwr / 1000.d0)**B
+        if (DEBUG) print "('Ambient Pressure (Pa) = ',d16.8)",Pa
+        if (DEBUG) print "('Central Pressure (Pc) = ',d16.8)",Pc 
+        if (DEBUG) print "('Pa - Pc = ',d16.8)",dp 
+        if (DEBUG) print "('dg = ',d16.8)",dg 
+        if (DEBUG) print "('Pa - Pc = ',d16.8)",dp 
 
         ! Set initial wind and pressure field, do not really need to do this
 !         aux(wind_index:wind_index+1,:,:) = 0.d0
 !         aux(pressure_index,:,:) = Pa
+
+!!       # Holland 1980 Model 
+!        ! Calculate Holland parameters and limit the result
+!        B = rho_air * exp(1.d0) * (mod_mws**2) / dp
+!        !if (B <  1.d0) B = 1.d0
+!        !if (B > 2.5d0) B = 2.5d0
+!
+!        if (DEBUG) print "('Holland B = ',d16.8)",B
+!        if (DEBUG) print "('Holland A = ',d16.8)",(mwr / 1000.d0)**B
+!
+!        ! Set initial wind and pressure field, do not really need to do this
+!!         aux(wind_index:wind_index+1,:,:) = 0.d0
+!!         aux(pressure_index,:,:) = Pa
         
         ! Set fields
         do j=1-mbc,my+mbc
@@ -604,18 +608,29 @@ contains
                 theta = atan2((y - sloc(2)) * DEG2RAD,(x - sloc(1)) * DEG2RAD)
 
                 ! Set pressure field
-                aux(pressure_index,i,j) = Pc + dp * exp(-(mwr / r)**Bs)
+                aux(pressure_index,i,j) = Pc + dp * exp(-(mwr / r)**B)
 
+                ! # HOLLAND 2010 WIND SPEED CALCULATION 
                 ! Speed of wind at this point
-                if (r <= mwr) then 
-                    wind = mws * (((mwr/r)**Bs) * exp(1-(mwr/r)**Bs))**0.5 
-                else 
-                    !xx = 0.5 + (r - mwr) * (xn - 0.5)/(rn - mwr)
-                    !print *,'xx', xx
-                    !xx = 0.6 * (1 - dp/215) 
-                    xx = 0.5
-                    wind = mws * (((mwr/r)**Bs) * exp(1-(mwr/r)**Bs))**xx  
-                end if
+                if (r <= mwr) then
+                    xx = 0.5 
+                    wind = mws * ((mwr / r)**B * exp(1 - (mwr / r)**B))**xx 
+                    !wind = sqrt((mwr / r)**B &
+                    !     * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
+                    !     + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
+                else
+                    xx = 0.5 + (r - mwr) * (xn - 0.5) / (rn - mwr) 
+                    wind = mws * ((mwr / r)**B * exp(1 - (mwr / r)**B))**xx 
+                    !wind = sqrt((mwr / r)**B &
+                    !     * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
+                    !     + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
+                endif  
+
+                !! # HOLLAND 1980 WIND SPEED CALCULATION 
+                !! Speed of wind at this point
+                !wind = sqrt((mwr / r)**B &
+                !        * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
+                !        + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
 
                 ! Convert wind velocity from top of atmospheric boundary layer
                 ! (which is what the Holland curve fit produces) to wind
@@ -648,59 +663,6 @@ contains
                                         * ramp
             enddo
         enddo
-!        ! Set fields
-!        do j=1-mbc,my+mbc
-!            y = ylower + (j-0.5d0) * dy     ! Degrees latitude
-!            f = coriolis(y)
-!            do i=1-mbc,mx+mbc
-!                x = xlower + (i-0.5d0) * dx   ! Degrees longitude
-!
-!                ! Calculate storm centric polar coordinate location of grid
-!                ! cell center, uses Haversine formula
-!                r = spherical_distance(x, y, sloc(1), sloc(2))
-!                theta = atan2((y - sloc(2)) * DEG2RAD,(x - sloc(1)) * DEG2RAD)
-!
-!                ! Set pressure field
-!                aux(pressure_index,i,j) = Pc + dp * exp(-(mwr / r)**B)
-!
-!                ! Speed of wind at this point
-!                if r < = mwr then 
-!                    wind = 
-!                wind = sqrt((mwr / r)**B &
-!                        * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
-!                        + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
-!
-!                ! Convert wind velocity from top of atmospheric boundary layer
-!                ! (which is what the Holland curve fit produces) to wind
-!                ! velocity at 10 m above the earth's surface
-!
-!                ! Also convert from 1 minute averaged winds to 10 minute
-!                ! averaged winds
-!                wind = wind * atmos_boundary_layer * sampling_time
-!
-!                ! Velocity components of storm (assumes perfect vortex shape)
-!                aux(wind_index,i,j)   = -wind * sin(theta)
-!                aux(wind_index+1,i,j) =  wind * cos(theta)
-!
-!                ! Add the storm translation speed
-!                ! Determine translation speed that should be added to final
-!                ! storm wind speed.  This is tapered to zero as the storm wind
-!                ! tapers to zero toward the eye of the storm and at long
-!                ! distances from the storm
-!                aux(wind_index,i,j) = aux(wind_index,i,j)                 &
-!                                                    + (abs(wind) / mws) * tv(1)
-!                aux(wind_index+1,i,j) = aux(wind_index+1,i,j)             &
-!                                                    + (abs(wind) / mws) * tv(2)
-!
-!                ! Apply distance ramp down(up) to fields to limit scope
-!                ramp = 0.5d0 * (1.d0 - tanh((r - rrp) / RAMP_WIDTH))
-!                aux(pressure_index,i,j) = Pa + (aux(pressure_index,i,j) - Pa) &
-!                                        * ramp
-!                aux(wind_index:wind_index+1,i,j) =                        &
-!                                        aux(wind_index:wind_index+1,i,j)  &
-!                                        * ramp
-!            enddo
-!        enddo
 
     end subroutine set_holland10_storm_fields
 
@@ -852,3 +814,141 @@ end module holland10_storm_module
 
 
 
+!    ! ==========================================================================
+!    !  set_holland10_storm_fields()
+!    ! ==========================================================================
+!    subroutine set_holland10_storm_fields(maux,mbc,mx,my,xlower, &
+!                                    ylower,dx,dy,t,aux, wind_index, &
+!                                    pressure_index, storm)
+!
+!        use geoclaw_module, only: g => grav, rho_air, ambient_pressure
+!        use geoclaw_module, only: coriolis, deg2rad
+!        use geoclaw_module, only: spherical_distance
+!
+!        use geoclaw_module, only: rad2deg
+!
+!        implicit none
+!
+!        ! Time of the wind field requested
+!        integer, intent(in) :: maux,mbc,mx,my
+!        real(kind=8), intent(in) :: xlower,ylower,dx,dy,t
+!
+!        ! Storm description, need in out here since we may update the storm
+!        ! if at next time point
+!        type(holland10_storm_type), intent(in out) :: storm
+!
+!        ! Array storing wind and presure field
+!        integer, intent(in) :: wind_index, pressure_index
+!        real(kind=8), intent(inout) :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc)
+!
+!        ! Local storage
+!        real(kind=8) :: x, y, r, theta, sloc(2)
+!        real(kind=8) :: f, mwr, mws, Pc, Pa, dp, wind, tv(2), rrp
+!        real(kind=8) :: mod_mws, trans_speed, ramp
+!        real(kind=8) :: xx, xn, rn, vn, dg, edg, rg 
+!        integer :: i,j
+!
+!        ! Get interpolated storm data
+!        call get_holland10_storm_data(t,storm,sloc,tv,mwr,mws,Pc,rrp)
+!        
+!        ! Other quantities of interest
+!        Pa = ambient_pressure
+!
+!        ! Calculate Holland parameters
+!        ! Subtract translational speed of storm from maximum wind speed
+!        ! to avoid distortion in the Holland curve fit.  Added back later
+!        trans_speed = sqrt(tv(1)**2 + tv(2)**2)
+!        mod_mws = mws - trans_speed
+!
+!        ! Convert wind speed (10 m) to top of atmospheric boundary layer
+!        mod_mws = mod_mws / atmos_boundary_layer
+!        
+!        ! Calculate central pressure difference
+!        dp = Pa - Pc
+!        ! Limit central pressure deficit due to bad ambient pressure,
+!        ! really should have better ambient pressure...
+!        if (dp < 100.d0) dp = 100.d0
+!
+!       !! Set initial wind and pressure field, do not really need to do this
+!        ! aux(wind_index:wind_index+1,:,:) = 0.d0
+!        ! aux(pressure_index,:,:) = Pa
+!       
+!        Bs = (mod_mws**2.d0) * (rho_air * exp(1.d0))/(dp)
+!        !Bs = (mws**2.d0) * (rho_air * exp(1.d0))/(100*dp) 
+! 
+!        if (Bs <  1.d0) Bs = 1.d0
+!        if (Bs > 2.5d0) Bs = 2.5d0
+!    
+!        dg = (mwr/rrp)**Bs 
+!        edg = exp(-1.d0*dg) 
+!        rg = 100 * Bs * dp * dg * edg/rho_air 
+!        rn = rrp  
+!        vn = 12  
+!        xn = log(vn)/log(rg) 
+!
+!        !if (DEBUG) print "('Holland B = ',d16.8)",B
+!        !if (DEBUG) print "('Holland A = ',d16.8)",(mwr / 1000.d0)**B
+!
+!        ! Set initial wind and pressure field, do not really need to do this
+!!         aux(wind_index:wind_index+1,:,:) = 0.d0
+!!         aux(pressure_index,:,:) = Pa
+!        
+!        ! Set fields
+!        do j=1-mbc,my+mbc
+!            y = ylower + (j-0.5d0) * dy     ! Degrees latitude
+!            f = coriolis(y)
+!            do i=1-mbc,mx+mbc
+!                x = xlower + (i-0.5d0) * dx   ! Degrees longitude
+!
+!                ! Calculate storm centric polar coordinate location of grid
+!                ! cell center, uses Haversine formula
+!                r = spherical_distance(x, y, sloc(1), sloc(2))
+!                theta = atan2((y - sloc(2)) * DEG2RAD,(x - sloc(1)) * DEG2RAD)
+!
+!                ! Set pressure field
+!                aux(pressure_index,i,j) = Pc + dp * exp(-(mwr / r)**Bs)
+!
+!                ! Speed of wind at this point
+!                if (r <= mwr) then 
+!                    wind = mws * (((mwr/r)**Bs) * exp(1-(mwr/r)**Bs))**0.5 
+!                else 
+!                    !xx = 0.5 + (r - mwr) * (xn - 0.5)/(rn - mwr)
+!                    !print *,'xx', xx
+!                    !xx = 0.6 * (1 - dp/215) 
+!                    xx = 0.5
+!                    wind = mws * (((mwr/r)**Bs) * exp(1-(mwr/r)**Bs))**xx  
+!                end if
+!
+!                ! Convert wind velocity from top of atmospheric boundary layer
+!                ! (which is what the Holland curve fit produces) to wind
+!                ! velocity at 10 m above the earth's surface
+!
+!                ! Also convert from 1 minute averaged winds to 10 minute
+!                ! averaged winds
+!                wind = wind * atmos_boundary_layer * sampling_time
+!
+!                ! Velocity components of storm (assumes perfect vortex shape)
+!                aux(wind_index,i,j)   = -wind * sin(theta)
+!                aux(wind_index+1,i,j) =  wind * cos(theta)
+!
+!                ! Add the storm translation speed
+!                ! Determine translation speed that should be added to final
+!                ! storm wind speed.  This is tapered to zero as the storm wind
+!                ! tapers to zero toward the eye of the storm and at long
+!                ! distances from the storm
+!                aux(wind_index,i,j) = aux(wind_index,i,j)                 &
+!                                                    + (abs(wind) / mws) * tv(1)
+!                aux(wind_index+1,i,j) = aux(wind_index+1,i,j)             &
+!                                                    + (abs(wind) / mws) * tv(2)
+!
+!                ! Apply distance ramp down(up) to fields to limit scope
+!                ramp = 0.5d0 * (1.d0 - tanh((r - rrp) / RAMP_WIDTH))
+!                aux(pressure_index,i,j) = Pa + (aux(pressure_index,i,j) - Pa) &
+!                                        * ramp
+!                aux(wind_index:wind_index+1,i,j) =                        &
+!                                        aux(wind_index:wind_index+1,i,j)  &
+!                                        * ramp
+!            enddo
+!        enddo
+!
+!    end subroutine set_holland10_storm_fields

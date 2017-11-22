@@ -22,7 +22,7 @@ mumbai = (72.8562, 19.0176)
 def create_storm_file(storm, output_path="mumbai.storm"):
 
     # Read in and create reference storm data
-    with open("../gulf/ike-cle/ike.storm", 'r') as ref_storm_file:
+    with open("../gulf/ike/ike-cle/ike.storm", 'r') as ref_storm_file:
         RRP = []
         max_winds = []
         central_pressure = []
@@ -178,11 +178,13 @@ def extract_data(path, mask_dist=numpy.infty, mask_category=0):
 
 
 if __name__ == '__main__':
-    path = "Mumbai3_io_ncep_reanalcal.mat"
+    #path = "Mumbai3_io_ncep_reanalcal.mat"
+    path = "Mumbai_IO_ncep_reanal.mat"
     #if len(sys.argv) > 1:
     #    path = sys.argv[1]
 
     storms = extract_data(path, mask_dist=0.2, mask_category=4)
+    print('Number of Storms:', len(storms))
     
     fig = plot_tracks(storms[2])
     fig.savefig('track_1.pdf')
@@ -191,3 +193,9 @@ if __name__ == '__main__':
 
     create_storm_file(storms[2], output_path="mumbai_1.storm")
     create_storm_file(storms[-2], output_path="mumbai_2.storm")
+
+    for x in range(0,len(storms)):  
+        fig = plot_tracks(storms[x])
+        fig.savefig('./mumbai_storms/track_%i.pdf' %x)
+        create_storm_file(storms[x], output_path = "./mumbai_storms/mumbai_%i.storm" %x)
+

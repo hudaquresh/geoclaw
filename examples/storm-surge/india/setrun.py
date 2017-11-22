@@ -420,7 +420,7 @@ def setgeo(rundata):
 
     # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-                                         'ike.storm'))
+                                         'mumbai_1.storm'))
 
     # =======================
     #  Set Variable Friction

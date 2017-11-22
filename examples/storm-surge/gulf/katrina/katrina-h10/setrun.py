@@ -15,9 +15,9 @@ import datetime
 import numpy as np
 
 # Calculate landfall time
-# Landfall for Ike in Houston was September 13th, at ~ 7:00:00 UTC
-landfall = datetime.datetime(2008, 9, 13, 7) - \
-           datetime.datetime(2008, 1, 1, 0)
+# Landfall for Katrina was August 29th 6:00:00 UTC
+landfall = datetime.datetime(2005, 8, 29, 6) - \
+           datetime.datetime(2005, 1, 1,  0)
 
 # Time Conversions
 def days2seconds(days):
@@ -317,19 +317,22 @@ def setrun(claw_pkg='geoclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     # Gauges from Ike AWR paper (2011 Dawson et al)
-    rundata.gaugedata.gauges.append([1, -95.04, 29.07,
+    # Pilots Station 
+    rundata.gaugedata.gauges.append([1, -89.07, 28.93,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([2, -94.71, 29.28,
+    # Grand Isle LA 
+    rundata.gaugedata.gauges.append([2, -89.95, 29.26,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([3, -94.39, 29.49,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([4, -94.13, 29.58,
+    
+    rundata.gaugedata.gauges.append([3, -87.7, 25.2,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
 
+    rundata.gaugedata.gauges.append([4, -88.7, 26.26,
+                                     rundata.clawdata.t0,
+                                     rundata.clawdata.tfinal])
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
     # ------------------------------------------------------------------
@@ -413,14 +416,19 @@ def setgeo(rundata):
 
     ## Storm parameters - Parameterized storm (Holland 1980)
     #data.storm_type = 1
-    # Storm parameters - Theoretical storm (CLE 2015) 
+
+    ## Storm parameters - Theoretical storm (CLE 2015) 
+    #data.storm_type = 4
+
+    # Storm parameters - Parameterized storm (Holland 2010)
     data.storm_type = 5
+
     data.landfall = days2seconds(landfall.days) + landfall.seconds
     data.display_landfall_time = True
 
     # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-                                         'ike.storm'))
+                                         'katrina.storm'))
 
     # =======================
     #  Set Variable Friction

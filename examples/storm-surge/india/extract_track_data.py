@@ -178,12 +178,13 @@ def extract_data(path, mask_dist=numpy.infty, mask_category=0):
 
 
 if __name__ == '__main__':
-    #path = "Mumbai3_io_ncep_reanalcal.mat"
-    path = "Mumbai_IO_ncep_reanal.mat"
+    path = "Mumbai3_io_ncep_reanalcal.mat"
+    #path = "Mumbai_IO_ncep_reanal.mat"
     #if len(sys.argv) > 1:
     #    path = sys.argv[1]
 
-    storms = extract_data(path, mask_dist=0.2, mask_category=4)
+    #storms = extract_data(path, mask_dist=0.2, mask_category=4)
+    storms = extract_data(path)
     print('Number of Storms:', len(storms))
     
     fig = plot_tracks(storms[2])

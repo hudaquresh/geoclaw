@@ -371,11 +371,15 @@ class SurgeData(clawpack.clawutil.data.ClawData):
         # Storm type 3 - Stommel wind field
         self.add_attribute('stommel_wind',1.0)
 
-        # Storm type 4 - Stommel wind field
+        # Storm type 4 - CLE2015 wind field
         self.add_attribute('cle_wind',1.0)
         
-        # Storm type 5 - Stommel wind field
-        self.add_attribute('cle_wind',1.0)
+        # Storm type 5 - Holland10 wind field
+        self.add_attribute('holland10_wind',1.0)
+        
+        # Storm type 6 - SLOSH wind field
+        self.add_attribute('slosh_wind',1.0)
+        
         
         # Algorithm parameters
         self.add_attribute("wind_index", 5)
@@ -420,7 +424,7 @@ class SurgeData(clawpack.clawutil.data.ClawData):
         self.data_write('storm_file',description="(Location of storm data)")
 
         if self.storm_type == 0 or self.storm_type == 1 or self.storm_type == 4\
-                    or self.storm_type == 5:
+                    or self.storm_type == 5 or self.storm_type == 6: 
             pass 
         elif self.storm_type == 2:
             # Open another data file called stored in storm_file and write the 

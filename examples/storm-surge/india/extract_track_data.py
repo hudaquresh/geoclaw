@@ -133,7 +133,8 @@ def storm_category(wind_speed):
     return category
 
 
-def extract_data(path, mask_dist=numpy.infty, mask_category=0):
+#def extract_data(path, mask_dist=numpy.infty, mask_category=0):
+def extract_data(path, mask_dist=numpy.infty):
 
     # Load the mat file and extract pertinent data
     import scipy.io
@@ -178,7 +179,7 @@ def extract_data(path, mask_dist=numpy.infty, mask_category=0):
 
 
 if __name__ == '__main__':
-    path = "Mumbai3_io_ncep_reanalcal.mat"
+    path = "/Users/hudaqureshi/research/scratch/Mumbai3_io_ncep_reanalcal.mat"
     #path = "Mumbai_IO_ncep_reanal.mat"
     #if len(sys.argv) > 1:
     #    path = sys.argv[1]
@@ -197,6 +198,6 @@ if __name__ == '__main__':
 
     for x in range(0,len(storms)):  
         fig = plot_tracks(storms[x])
-        fig.savefig('./mumbai_storms/track_%i.pdf' %x)
-        create_storm_file(storms[x], output_path = "./mumbai_storms/mumbai_%i.storm" %x)
+        fig.savefig('~/research/scratch/mumbai_storms/track_%i.pdf' %x)
+        create_storm_file(storms[x], output_path='~/research/scratch/mumbai_storms/mumbai_%i.storm' %x)
 

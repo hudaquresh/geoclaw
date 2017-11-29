@@ -15,6 +15,7 @@ module storm_module
     use stommel_storm_module, only: stommel_storm_type
     use cle_storm_module, only: cle_storm_type
     use holland10_storm_module, only: holland10_storm_type
+    use slosh_storm_module, only: slosh_storm_type
 
     implicit none
 
@@ -51,10 +52,11 @@ module storm_module
     real(kind=8) :: landfall = 0.d0
     real(kind=8) :: ramp_width
     type(holland_storm_type), save :: holland_storm
-    type(holland10_storm_type), save :: holland10_storm
     type(constant_storm_type), save :: constant_storm
     type(stommel_storm_type), save :: stommel_storm
     type(cle_storm_type), save :: cle_storm 
+    type(holland10_storm_type), save :: holland10_storm
+    type(slosh_storm_type), save :: slosh_storm 
     
     ! Wind drag maximum limit
     real(kind=8), parameter :: WIND_DRAG_LIMIT = 2.d-3
@@ -84,7 +86,7 @@ contains
         use stommel_storm_module, only: set_stommel_storm
         use cle_storm_module, only: set_cle_storm
         use holland10_storm_module, only: set_holland10_storm
-
+        use slosh_storm_module, only: set_slosh_storm 
         use geoclaw_module, only: pi
 
         implicit none
@@ -184,11 +186,17 @@ contains
                 ! Stommel wind field
                 call set_stommel_storm(storm_file_path,stommel_storm,log_unit)
             else if (storm_type == 4) then
-                ! Stommel wind field
+                ! Track file with CLE reconstruction
                 call set_cle_storm(storm_file_path,cle_storm,log_unit)
+                ! Set rho_air and ambient pressure in storms
             else if (storm_type == 5) then
-                ! Stommel wind field
+                ! Track file with Holland10 reconstruction
                 call set_holland10_storm(storm_file_path,holland10_storm,log_unit)
+                ! Set rho_air and ambient pressure in storms
+            else if (storm_type == 6) then
+                ! Stommel wind field
+                call set_slosh_storm(storm_file_path,slosh_storm,log_unit)
+                ! Set rho_air and ambient pressure in storms
             else
                 print *,"Invalid storm type ",storm_type," provided."
                 stop
@@ -337,6 +345,7 @@ contains
         use constant_storm_module, only: constant_storm_location
         use cle_storm_module, only: cle_storm_location 
         use holland10_storm_module, only: holland10_storm_location
+        use slosh_storm_module, only: slosh_storm_location 
 
         implicit none
 
@@ -359,6 +368,8 @@ contains
                 location = cle_storm_location(t,cle_storm)
             case(5) 
                 location = holland10_storm_location(t,holland10_storm)
+            case(6) 
+                location = slosh_storm_location(t,slosh_storm)
         end select
 
     end function storm_location
@@ -370,6 +381,7 @@ contains
         use constant_storm_module, only: constant_storm_direction
         use cle_storm_module, only: cle_storm_direction
         use holland10_storm_module, only: holland10_storm_direction
+        use slosh_storm_module, only: slosh_storm_direction
 
         implicit none
 
@@ -389,6 +401,8 @@ contains
                 theta = cle_storm_direction(t,cle_storm) 
             case(5)
                 theta = holland10_storm_direction(t,holland10_storm)
+            case(6)
+                theta = slosh_storm_direction(t,slosh_storm) 
         end select
 
     end function storm_direction
@@ -402,6 +416,7 @@ contains
         use stommel_storm_module, only: set_stommel_storm_fields
         use cle_storm_module, only: set_cle_storm_fields
         use holland10_storm_module, only: set_holland10_storm_fields
+        use slosh_storm_module, only: set_slosh_storm_fields
 
         implicit none
 
@@ -433,6 +448,10 @@ contains
                 call set_holland10_storm_fields(maux,mbc,mx,my, &
                                     xlower,ylower,dx,dy,t,aux, wind_index, &
                                     pressure_index, holland10_storm)
+            case(6)
+                call set_slosh_storm_fields(maux,mbc,mx,my, &
+                                    xlower,ylower,dx,dy,t,aux, wind_index, &
+                                    pressure_index, slosh_storm)
         end select
 
     end subroutine set_storm_fields

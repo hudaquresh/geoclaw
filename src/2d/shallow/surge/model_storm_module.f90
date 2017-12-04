@@ -537,7 +537,6 @@ contains
                                        dx, dy, t, aux, wind_index,           &
                                        pressure_index, storm)
 
-        implicit none
 
         use geoclaw_module, only: g => grav, rho_air, ambient_pressure
         use geoclaw_module, only: coriolis, deg2rad
@@ -563,6 +562,8 @@ contains
         real(kind=8) :: x, y, r, theta, sloc(2), B
         real(kind=8) :: f, mwr, mws, Pc, Pa, dp, wind, tv(2), radius
         real(kind=8) :: mod_mws, trans_speed, ramp
+        real(kind=8) :: rn, vn, xn, xx  
+        real(kind=8) :: dg, edg, rg 
         integer :: i,j
 
         ! Get interpolated storm data
@@ -588,11 +589,13 @@ contains
 
         ! Calculate Holland parameters and limit the result
         B = rho_air * exp(1.d0) * (mod_mws**2) / dp
-        if (B <  1.d0) B = 1.d0
-        if (B > 2.5d0) B = 2.5d0
 
-        if (DEBUG) print "('Holland B = ',d16.8)",B
-        if (DEBUG) print "('Holland A = ',d16.8)",(mwr / 1000.d0)**B
+        rn = 500000  
+        dg = (mwr/rn)**B 
+        edg = exp(1.d0-dg) 
+        rg = dg * edg/rho_air 
+        vn = 12  
+        xn = log(vn/mws)/log(rg)
         
         ! Set fields
         do j=1-mbc,my+mbc
@@ -609,10 +612,21 @@ contains
                 ! Set pressure field
                 aux(pressure_index,i,j) = Pc + dp * exp(-(mwr / r)**B)
 
+                ! # HOLLAND 2010 WIND SPEED CALCULATION 
                 ! Speed of wind at this point
-                wind = sqrt((mwr / r)**B &
-                        * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
-                        + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
+                if (r <= mwr) then
+                    xx = 0.5 
+                    wind = mws * ((mwr / r)**B * exp(1 - (mwr / r)**B))**xx 
+                    !wind = sqrt((mwr / r)**B &
+                    !     * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
+                    !     + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
+                else
+                    xx = 0.5 + (r - mwr) * (xn - 0.5) / (rn - mwr) 
+                    wind = mws * ((mwr / r)**B * exp(1 - (mwr / r)**B))**xx 
+                    !wind = sqrt((mwr / r)**B &
+                    !     * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
+                    !     + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
+                endif  
 
                 ! Convert wind velocity from top of atmospheric boundary layer
                 ! (which is what the Holland curve fit produces) to wind

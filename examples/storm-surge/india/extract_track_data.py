@@ -170,10 +170,10 @@ def extract_data(path, mask_dist=numpy.infty):
                  'dist_mumbai': distance
                  }
 
-        if (numpy.any(storm['dist_mumbai'] < mask_dist) and
-            numpy.any(storm['category'] > mask_category)):
+        #if (numpy.any(storm['dist_mumbai'] < mask_dist) and
+        #    numpy.any(storm['category'] > mask_category)):
 
-            storms.append(storm)
+        storms.append(storm)
 
     return storms
 

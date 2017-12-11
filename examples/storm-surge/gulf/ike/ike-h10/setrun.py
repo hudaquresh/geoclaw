@@ -411,15 +411,8 @@ def setgeo(rundata):
     data.wind_refine = [20.0, 40.0, 60.0]
     data.R_refine = [60.0e3, 40e3, 20e3]
 
-    ## Storm parameters - Parameterized storm (Holland 1980)
-    #data.storm_type = 1
-
-    ## Storm parameters - Theoretical storm (CLE 2015) 
-    #data.storm_type = 4
-
     # Storm parameters - Parameterized storm (Holland 2010)
     data.storm_type = 5
-
     data.landfall = days2seconds(landfall.days) + landfall.seconds
     data.display_landfall_time = True
 

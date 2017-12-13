@@ -53,7 +53,7 @@ def setplot(plotdata=None):
         # Storm 1
         #landfall_dt = datetime.datetime(2007, 11, 8, 8) - \
         #        datetime.datetime(2007, 1, 1, 0)
-        landfall_dt = datetime.datetime(1997, 11, 15, 3) - \
+        landfall_dt = datetime.datetime(1997, 11, 12, 3) - \
                 datetime.datetime(1997, 1, 1, 0)
     elif storm_num == 2:
         # Storm 2

@@ -75,10 +75,9 @@ def create_storm_file(storm, output_path="mumbai.storm"):
                                 % (str(int(storm['track'][1][n] * 10)).rjust(4), lat_dir,
                                 str(int(storm['track'][0][n] * 10)).rjust(4), lon_dir))
             storm_file.write(" %s" % str(int(storm['max_winds'][n])).rjust(3))
-            storm_file.write(" %s" % str(int(storm['radius_max_winds'][n] *
-10)).rjust(4))
+            storm_file.write(" %s" % str(int(storm['radius_max_winds'][n] * 2)).rjust(4))
             storm_file.write(" %s" % str(int(storm['central_pressure'][n])).rjust(4))
-            storm_file.write(" 999")
+            storm_file.write(" 400")
             storm_file.write('\n')
 
 

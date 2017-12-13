@@ -82,14 +82,15 @@ contains
         ! Note that the JAM file format has not been tested yet and will later
         ! be added as an option.
         character(len=4), parameter :: file_format = "NOAA"
+       ! character(len=5), parameter :: file_format = "TRACK"
 
         ! File format string
         character(len=*), parameter :: JMA_FORMAT = "(i2,i2,i2,i2,8x,i3,1x,"//&
                             "i4,1x,i4,5x,i3)"
-        !character(len=*), parameter :: NOAA_FORMAT = "(8x,i4,i2,i2,i2,6x,a4,"//&
-        !                    "2x,i3,1x,i4,a1,2x,i4,a1,2x,i3,2x,i4,47x,i3,2x,i3)"
         character(len=*), parameter :: NOAA_FORMAT = "(8x,i4,i2,i2,i2,6x,a4,"//&
                             "2x,i3,1x,i4,a1,2x,i4,a1,2x,i3,2x,i4,47x,i3,2x,i3)"
+        character(len=*), parameter :: TRACK_FORMAT= "(i4,i2,i2,i2,1x,i4,a1,"//&
+                            "1x,i4,a1,1x,i3,1x,i4,1x,i4,1x,i3)"
 
         if (.not. module_setup) then
             
@@ -127,6 +128,10 @@ contains
                     ! ramping function so it might not be an issue
                     read(data_file,fmt=JMA_FORMAT,iostat=io_status) year, month, day, &
                             hour, lat, lon, central_pressure, max_wind_speed, max_wind_radius
+                else if (file_format == "TRACK") then
+                    read(data_file,fmt=TRACK_FORMAT,iostat=io_status) year,month,day, &
+                        hour,lat,direction(2),lon,direction(1), &
+                        max_wind_speed,max_wind_radius,central_pressure,RRP
                 else
                     print *,"ERROR - Unrecognized storm data file format."
                     stop
@@ -163,6 +168,10 @@ contains
                 else if (file_format == "JAM") then
                     read(data_file,fmt=JMA_FORMAT,iostat=io_status) year, month, day, &
                             hour, lat, lon, central_pressure, max_wind_speed, max_wind_radius
+                else if (file_format == "TRACK") then
+                    read(data_file,fmt=TRACK_FORMAT,iostat=io_status) year,month,day, &
+                        hour,lat,direction(2),lon,direction(1), &
+                        max_wind_speed,max_wind_radius,central_pressure,RRP
                 else
                     print *,"ERROR - Unrecognized storm data file format."
                     stop

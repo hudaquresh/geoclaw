@@ -19,7 +19,7 @@ OUTDIR = _output               # Directory for output
 SETPLOT_FILE = setplot.py      # File containing function to set plots
 PLOTDIR = _plots               # Directory for plots
 #NETCDF4_DIR=/Users/hudaqureshi/anaconda
-NETCDF4_DIR=/usr/local
+#NETCDF4_DIR=/usr/local
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 #FFLAGS += ?

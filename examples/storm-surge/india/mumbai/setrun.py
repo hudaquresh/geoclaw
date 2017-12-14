@@ -432,7 +432,7 @@ def setgeo(rundata):
     data.R_refine = [60.0e3, 40e3, 20e3]
 
     # Storm parameters - Parameterized storm (Holland 1980)
-    data.storm_type = 1
+    data.storm_type = 4
     data.landfall = days2seconds(landfall.days) + landfall.seconds
     data.display_landfall_time = True
 
@@ -455,10 +455,10 @@ def setgeo(rundata):
                                   [np.infty, 0.0, -np.infty],
                                   [0.030, 0.022]])
 
-    # La-Tex Shelf
-    data.friction_regions.append([(80, 67.8), (90, 70),
-                                  [np.infty, -10.0, -200.0, -np.infty],
-                                  [0.030, 0.012, 0.022]])
+#    # La-Tex Shelf
+#    data.friction_regions.append([(80, 67.8), (90, 70),
+#                                  [np.infty, -10.0, -200.0, -np.infty],
+#                                  [0.030, 0.012, 0.022]])
 
     return rundata
     # end of function setgeo

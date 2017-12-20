@@ -81,8 +81,8 @@ contains
 
         ! Note that the JAM file format has not been tested yet and will later
         ! be added as an option.
-        character(len=4), parameter :: file_format = "NOAA"
-       ! character(len=5), parameter :: file_format = "TRACK"
+      !  character(len=4), parameter :: file_format = "NOAA"
+        character(len=5), parameter :: file_format = "TRACK"
 
         ! File format string
         character(len=*), parameter :: JMA_FORMAT = "(i2,i2,i2,i2,8x,i3,1x,"//&

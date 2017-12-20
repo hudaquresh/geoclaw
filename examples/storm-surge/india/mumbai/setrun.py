@@ -134,7 +134,7 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style == 1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(landfall.days + 1.0) + \
+        clawdata.tfinal = days2seconds(landfall.days + 5.0) + \
                                        landfall.seconds
         recurrence = 4
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
@@ -338,14 +338,14 @@ def setrun(claw_pkg='geoclaw'):
     rundata.gaugedata.gauges.append([2, 72, 18,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    # Bay imprecise coordinates
-    rundata.gaugedata.gauges.append([3, 72.5, 18.5,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
-    # Penin imprecise coordinates
-    rundata.gaugedata.gauges.append([4, 72.4, 18.5,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
+    ## Bay imprecise coordinates
+    #rundata.gaugedata.gauges.append([3, 72.5, 18.5,
+    #                                 rundata.clawdata.t0,
+    #                                 rundata.clawdata.tfinal])
+    ## Penin imprecise coordinates
+    #rundata.gaugedata.gauges.append([4, 72.4, 18.5,
+    #                                 rundata.clawdata.t0,
+    #                                 rundata.clawdata.tfinal])
 
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -385,7 +385,7 @@ def setgeo(rundata):
 
     # == Algorithm and Initial Conditions ==
     # Due to seasonal swelling of gulf we set sea level higher
-    geo_data.sea_level = 0.28
+    geo_data.sea_level = 0    
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -432,7 +432,7 @@ def setgeo(rundata):
     data.R_refine = [60.0e3, 40e3, 20e3]
 
     # Storm parameters - Parameterized storm (Holland 1980)
-    data.storm_type = 4
+    data.storm_type = 1
     data.landfall = days2seconds(landfall.days) + landfall.seconds
     data.display_landfall_time = True
 

@@ -13,7 +13,7 @@ indian_ocean_topo.read(nc_params={"x_var":"lon", "y_var":"lat",
 "z_var":"Band1"})
 # indian_ocean_topo.Z = numpy.ma.MaskedArray(indian_ocean_topo.Z)
 
-mumbai_topo = topotools.Topography("mumbai.tt3")
+#mumbai_topo = topotools.Topography("mumbai.tt3")
 # mumbai_topo.Z = numpy.ma.MaskedArray(mumbai_topo.Z)
 
 # region_extent = indian_ocean_topo.extent

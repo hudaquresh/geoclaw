@@ -22,7 +22,7 @@ mumbai = (72.8562, 19.0176)
 def create_storm_file(storm, output_path="mumbai.storm"):
 
     # Read in and create reference storm data
-    with open("ike.storm", 'r') as ref_storm_file:
+    with open("mumbai_in_ike.storm", 'r') as ref_storm_file:
         RRP = []
         max_winds = []
         central_pressure = []
@@ -66,10 +66,10 @@ def create_storm_file(storm, output_path="mumbai.storm"):
                 lat_dir = "S"
             else:
                 lat_dir = "N"
-            if storm['track'][0][n] < 0:
-                lon_dir = "E"
-            else:
+            if storm['track'][0][n] > 0:
                 lon_dir = "W"
+            else:
+                lon_dir = "E"
             # YYYYMMDDHH LLLLD LLLLD WWW PPPP RRR
             storm_file.write(" %s%s %s%s" 
                                 % (str(int(storm['track'][1][n] * 10)).rjust(4), lat_dir,

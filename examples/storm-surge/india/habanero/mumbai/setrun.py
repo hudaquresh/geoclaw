@@ -14,7 +14,21 @@ import datetime
 
 import numpy as np
 
-from clawpack.geoclaw.surge.storm import Storm
+storm_num = 1
+
+# Calculate landfall for storm chosen
+if storm_num == 1:
+    # Storm  1
+    landfall = datetime.datetime(2007, 11, 8, 8) - datetime.datetime(2007, 1,
+1, 0)
+#    landfall = datetime.datetime(1997, 11, 12, 3) - datetime.datetime(1997, 1,
+#1, 0)
+    print('storm_num:', storm_num)
+elif storm_num == 2:
+    # Storm 2 - 2008 12 08 18 to 2008 12 20 02
+    landfall = datetime.datetime(2008, 12, 17, 1) - datetime.datetime(2008, 1,
+1, 0)
+
 
 # Time Conversions
 def days2seconds(days):
@@ -26,9 +40,9 @@ def seconds2days(seconds):
 # Scratch directory for storing topo and dtopo files:
 scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
 
-
-# ------------------------------
+#------------------------------
 def setrun(claw_pkg='geoclaw'):
+#------------------------------
 
     """
     Define the parameters used for running Clawpack.
@@ -65,11 +79,11 @@ def setrun(claw_pkg='geoclaw'):
     clawdata.num_dim = num_dim
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -99.0      # west longitude
-    clawdata.upper[0] = -70.0      # east longitude
+    clawdata.lower[0] = 47      # west longitude
+    clawdata.upper[0] = 100.0      # east longitude
 
-    clawdata.lower[1] = 8.0       # south latitude
-    clawdata.upper[1] = 32.0      # north latitude
+    clawdata.lower[1] = -10       # south latitude
+    clawdata.upper[1] = 31.0      # north latitude
 
     # Number of grid cells:
     degree_factor = 4 # (0.25º,0.25º) ~ (25237.5 m, 27693.2 m) resolution
@@ -96,7 +110,7 @@ def setrun(claw_pkg='geoclaw'):
     # -------------
     # Initial time:
     # -------------
-    clawdata.t0 = -days2seconds(3)
+    clawdata.t0 = days2seconds(landfall.days - 2) + landfall.seconds
     # clawdata.t0 = days2seconds(landfall.days - 1) + landfall.seconds
 
     # Restart from checkpoint file of a previous run?
@@ -120,7 +134,8 @@ def setrun(claw_pkg='geoclaw'):
     if clawdata.output_style == 1:
         # Output nout frames at equally spaced times up to tfinal:
         # clawdata.tfinal = days2seconds(date2days('2008091400'))
-        clawdata.tfinal = days2seconds(1.0)
+        clawdata.tfinal = days2seconds(landfall.days + 9.0) + \
+                                       landfall.seconds
         recurrence = 4
         clawdata.num_output_times = int((clawdata.tfinal - clawdata.t0) *
                                         recurrence / (60**2 * 24))
@@ -236,7 +251,7 @@ def setrun(claw_pkg='geoclaw'):
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
-    clawdata.checkpt_style = 0
+    clawdata.checkpt_style = 0 
 
     if clawdata.checkpt_style == 0:
         # Do not checkpoint at all
@@ -312,19 +327,25 @@ def setrun(claw_pkg='geoclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    # Gauges from Ike AWR paper (2011 Dawson et al)
-    rundata.gaugedata.gauges.append([1, -95.04, 29.07,
+    # TODO: Currently imprecise coordinates need to replace 
+    # gauge loc with precie ones
+ 
+    # Mahim Bay imprecise coordinates
+    rundata.gaugedata.gauges.append([1, 72, 19,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([2, -94.71, 29.28,
+    # Back Bay imprecise coordinates
+    rundata.gaugedata.gauges.append([2, 72, 18,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([3, -94.39, 29.49,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
-    rundata.gaugedata.gauges.append([4, -94.13, 29.58,
-                                     rundata.clawdata.t0,
-                                     rundata.clawdata.tfinal])
+    ## Bay imprecise coordinates
+    #rundata.gaugedata.gauges.append([3, 72.5, 18.5,
+    #                                 rundata.clawdata.t0,
+    #                                 rundata.clawdata.tfinal])
+    ## Penin imprecise coordinates
+    #rundata.gaugedata.gauges.append([4, 72.4, 18.5,
+    #                                 rundata.clawdata.t0,
+    #                                 rundata.clawdata.tfinal])
 
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
@@ -364,7 +385,7 @@ def setgeo(rundata):
 
     # == Algorithm and Initial Conditions ==
     # Due to seasonal swelling of gulf we set sea level higher
-    geo_data.sea_level = 0.28
+    geo_data.sea_level = 0    
     geo_data.dry_tolerance = 1.e-2
 
     # Refinement Criteria
@@ -382,10 +403,13 @@ def setgeo(rundata):
     #   [topotype, minlevel, maxlevel, t1, t2, fname]
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
-    topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
-    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0,
-                                rundata.clawdata.tfinal,
-                                topo_path])
+    topo_path = os.path.join(os.getcwd(),'../bathy/')
+    indian_ocean = os.path.join(topo_path, "indian_ocean.nc")
+   # mumbai_topo = os.path.join(topo_path, "mumbai.tt3")
+
+    topo_data.topofiles.append([4, 1, 5, rundata.clawdata.t0,
+                                         rundata.clawdata.tfinal,
+                                         indian_ocean])
 
     # == setfixedgrids.data values ==
     rundata.fixed_grid_data.fixedgrids = []
@@ -403,24 +427,18 @@ def setgeo(rundata):
     data.drag_law = 1
     data.pressure_forcing = True
 
-    data.display_landfall_time = True
-
     # AMR parameters, m/s and m respectively
     data.wind_refine = [20.0, 40.0, 60.0]
     data.R_refine = [60.0e3, 40e3, 20e3]
 
     # Storm parameters - Parameterized storm (Holland 1980)
-    data.storm_specification_type = 'holland80' # (type 1)
+    data.storm_type = 1
+    data.landfall = days2seconds(landfall.days) + landfall.seconds
+    data.display_landfall_time = True
+
+    # Storm type 2 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-
-    # Check to make sure storm file exists
-    # if not os.path.exists(data.storm_file):
-    ike = Storm(path='./ike.storm', file_format="ATCF", single_storm=True)
-
-    # Calculate landfall time - Need to specify as the file above does not
-    # include this info (9/13/2008 ~ 7 UTC)
-    ike.time_offset = datetime.datetime(2008, 9, 13, 7)
-    ike.write(data.storm_file, file_format='geoclaw')
+                                         'mumbai_1.storm'))
 
     # =======================
     #  Set Variable Friction
@@ -437,14 +455,68 @@ def setgeo(rundata):
                                   [np.infty, 0.0, -np.infty],
                                   [0.030, 0.022]])
 
-    # La-Tex Shelf
-    data.friction_regions.append([(-98, 25.25), (-90, 30),
-                                  [np.infty, -10.0, -200.0, -np.infty],
-                                  [0.030, 0.012, 0.022]])
+#    # La-Tex Shelf
+#    data.friction_regions.append([(80, 67.8), (90, 70),
+#                                  [np.infty, -10.0, -200.0, -np.infty],
+#                                  [0.030, 0.012, 0.022]])
 
     return rundata
     # end of function setgeo
     # ----------------------
+
+
+#def set_storm(rundata):
+#
+#    data = rundata.surge_data
+#
+#    # Physics parameters
+#    #data.rho_air = 1.15
+#    #data.ambient_pressure = 101.3e3 # Nominal atmos pressure
+#
+#    # Source term controls - These are currently not respected
+#    data.wind_forcing = True
+#    data.drag_law = 1
+#    data.pressure_forcing = True
+#    
+#    # Source term algorithm parameters
+#    # data.wind_tolerance = 1e-4
+#    # data.pressure_tolerance = 1e-4 # Pressure source term tolerance
+#
+#    # AMR parameters
+#    data.wind_refine = [20.0,40.0,60.0] # m/s
+#    data.R_refine = [60.0e3,40e3,20e3]  # m
+    
+ #   # Storm parameters
+ #   data.storm_type = 1 # Type of storm
+ #   data.landfall = days2seconds(landfall.days) + landfall.seconds
+ #   data.display_landfall_time = True
+
+ #   # Storm type 1 - Idealized storm track
+ #   if storm_num == 1:
+ #       data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
+# mumbai_1.storm'))
+ #   elif storm_num == 2:
+ #       data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
+#'mumbai_2.storm'))
+
+#    return rundata
+
+
+#def set_friction(rundata):
+#
+#    data = rundata.friction_data
+#
+#    # Variable friction
+#    data.variable_friction = True
+#
+#    # Region based friction
+#    # Entire domain
+#    data.friction_regions.append([rundata.clawdata.lower, 
+#                                  rundata.clawdata.upper,
+#                                  [np.infty,0.0,-np.infty],
+#                                  [0.030, 0.022]])
+#
+#    return rundata
 
 
 if __name__ == '__main__':
@@ -454,5 +526,7 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
+#    rundata = set_storm(rundata)
+#    rundata = set_friction(rundata)
 
     rundata.write()

@@ -1,0 +1,3 @@
+scp -r hq2152@habaxfer.rcs.columbia.edu:/rigel/apam/users/hq2152/clawpack/geoclaw/examples/storm-surge/india/mumbai/ /Users/hudaqureshi/clawpack/geoclaw/examples/storm-surge/india/habanero/
+
+

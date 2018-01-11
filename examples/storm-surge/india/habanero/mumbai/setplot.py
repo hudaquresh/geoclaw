@@ -22,6 +22,7 @@ try:
 except:
     setplotfg = None
 
+storm_num = 1
 
 def setplot(plotdata=None):
     """"""
@@ -47,23 +48,41 @@ def setplot(plotdata=None):
     # Load storm track
     track = surgeplot.track_data(os.path.join(plotdata.outdir, 'fort.track'))
 
-    # Calculate landfall time
-    # Landfall for Ike in Houston was September 13th, at 7 UTC
-    # landfall_dt = datetime.datetime(2008, 9, 13, 7) - \
-    #               datetime.datetime(2008, 1, 1,  0)
-    # landfall = landfall_dt.days * 24.0 * 60**2 + landfall_dt.seconds
+    # Calculate landfall time, off by a day, maybe leap year issue?
+    if storm_num == 1:
+        # Storm 1
+        landfall_dt = datetime.datetime(2007, 11, 8, 8) - \
+                datetime.datetime(2007, 1, 1, 0)
+        #landfall_dt = datetime.datetime(1997, 11, 12, 3) - \
+        #        datetime.datetime(1997, 1, 1, 0)
+    elif storm_num == 2:
+        # Storm 2
+        landfall_dt = datetime.datetime(2008, 12, 17, 0) - \
+                datetime.datetime(2008, 1, 1, 0)
+
+    landfall = landfall_dt.days * 24.0 * 60**2 + landfall_dt.seconds
 
     # Set afteraxes function
     def surge_afteraxes(cd):
-        surgeplot.surge_afteraxes(cd, track, plot_direction=False,
+        surgeplot.surge_afteraxes(cd, track, landfall, plot_direction=False,
                                   kwargs={"markersize": 4})
 
     # Color limits
-    surface_limits = [-5.0, 5.0]
+    surface_limits = [physics.sea_level - 5.0, physics.sea_level + 5.0]
+    surface_ticks = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+    surface_labels = [str(value) for value in surface_ticks]
     speed_limits = [0.0, 3.0]
+    speed_ticks = [0, 1, 2, 3]
+    speed_labels = [str(value) for value in speed_ticks]
     wind_limits = [0, 64]
     pressure_limits = [935, 1013]
     friction_bounds = [0.01, 0.04]
+
+    def add_custom_colorbar_ticks_to_axes(axes, item_name, ticks,
+                                          tick_labels=None):
+        """Adjust colorbar ticks and labels"""
+        axes.plotitem_dict[item_name].colorbar_ticks = ticks
+        axes.plotitem_dict[item_name].colorbar_tick_labels = tick_labels
 
     def gulf_after_axes(cd):
         # plt.subplots_adjust(left=0.08, bottom=0.04, right=0.97, top=0.96)
@@ -81,7 +100,7 @@ def setplot(plotdata=None):
     # ==========================================================================
     #   Plot specifications
     # ==========================================================================
-    regions = {"Gulf": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
+    regions = {"Mumbai": {"xlimits": (clawdata.lower[0], clawdata.upper[0]),
                         "ylimits": (clawdata.lower[1], clawdata.upper[1]),
                         "figsize": (6.4, 4.8)},
                "LaTex Shelf": {"xlimits": (-97.5, -88.5),
@@ -103,6 +122,8 @@ def setplot(plotdata=None):
         surgeplot.add_land(plotaxes)
         plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
         plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
+        add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks,
+                                          surface_labels)
 
         # Speed Figure
         plotfigure = plotdata.new_plotfigure(name="Currents - %s" % name)
@@ -117,6 +138,9 @@ def setplot(plotdata=None):
         surgeplot.add_land(plotaxes)
         plotaxes.plotitem_dict['speed'].amr_patchedges_show = [0] * 10
         plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
+        add_custom_colorbar_ticks_to_axes(plotaxes, 'speed', speed_ticks,
+                                          speed_labels)
+
     #
     # Friction field
     #
@@ -124,8 +148,8 @@ def setplot(plotdata=None):
     plotfigure.show = friction_data.variable_friction and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Mumbai']['xlimits']
+    plotaxes.ylimits = regions['Mumbai']['ylimits']
     # plotaxes.title = "Manning's N Coefficient"
     plotaxes.afteraxes = friction_after_axes
     plotaxes.scaled = True
@@ -142,8 +166,8 @@ def setplot(plotdata=None):
     plotfigure.show = surge_data.pressure_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Mumbai']['xlimits']
+    plotaxes.ylimits = regions['Mumbai']['ylimits']
     plotaxes.title = "Pressure Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -155,8 +179,8 @@ def setplot(plotdata=None):
     plotfigure.show = surge_data.wind_forcing and True
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = regions['Gulf']['xlimits']
-    plotaxes.ylimits = regions['Gulf']['ylimits']
+    plotaxes.xlimits = regions['Mumbai']['xlimits']
+    plotaxes.ylimits = regions['Mumbai']['ylimits']
     plotaxes.title = "Wind Field"
     plotaxes.afteraxes = surge_afteraxes
     plotaxes.scaled = True
@@ -182,7 +206,7 @@ def setplot(plotdata=None):
     def gauge_afteraxes(cd):
 
         axes = plt.gca()
-        surgeplot.plot_landfall_gauge(cd.gaugesoln, axes)
+        surgeplot.plot_landfall_gauge(cd.gaugesoln, axes, landfall=landfall)
 
         # Fix up plot - in particular fix time labels
         axes.set_title('Station %s' % cd.gaugeno)
@@ -216,10 +240,12 @@ def setplot(plotdata=None):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.title = 'Gauge Locations'
     plotaxes.scaled = True
-    plotaxes.xlimits = [-95.5, -94]
+    plotaxes.xlimits = [-95.8, -93.8]
     plotaxes.ylimits = [29.0, 30.0]
     plotaxes.afteraxes = gauge_location_afteraxes
     surgeplot.add_surface_elevation(plotaxes, bounds=surface_limits)
+    add_custom_colorbar_ticks_to_axes(plotaxes, 'surface', surface_ticks,
+                                      surface_labels)
     surgeplot.add_land(plotaxes)
     plotaxes.plotitem_dict['surface'].amr_patchedges_show = [0] * 10
     plotaxes.plotitem_dict['land'].amr_patchedges_show = [0] * 10
@@ -231,7 +257,7 @@ def setplot(plotdata=None):
     plotdata.printfigs = True                # print figures
     plotdata.print_format = 'png'            # file format
     plotdata.print_framenos = 'all'          # list of frames to print
-    plotdata.print_gaugenos = [1, 2, 3, 4]   # list of gauges to print
+    plotdata.print_gaugenos = [1, 2]   # list of gauges to print
     plotdata.print_fignos = 'all'            # list of figures to print
     plotdata.html = True                     # create html files of plots?
     plotdata.latex = True                    # create latex file of plots?

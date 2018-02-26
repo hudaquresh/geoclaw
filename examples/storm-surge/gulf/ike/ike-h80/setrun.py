@@ -387,6 +387,7 @@ def setgeo(rundata):
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
+
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0,
                                 rundata.clawdata.tfinal,
                                 topo_path])

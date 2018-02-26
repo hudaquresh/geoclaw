@@ -322,7 +322,7 @@ def setrun(claw_pkg='geoclaw'):
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
     # Grand Isle LA 
-    rundata.gaugedata.gauges.append([2, -89.95, 29.26,
+    rundata.gaugedata.gauges.append([2, -89.956667, 29.263333,
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
     
@@ -390,9 +390,15 @@ def setgeo(rundata):
     # See regions for control over these regions, need better bathy data for
     # the smaller domains
     topo_path = os.path.join(scratch_dir, 'gulf_caribbean.tt3')
+    new_orleans = os.path.join(scratch_dir, 'NewOrleans_3s.tt3') 
+
     topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0,
                                 rundata.clawdata.tfinal,
                                 topo_path])
+
+    topo_data.topofiles.append([3, 1, 5, rundata.clawdata.t0,
+                                rundata.clawdata.tfinal,
+                                new_orleans])
 
     # == setfixedgrids.data values ==
     rundata.fixed_grid_data.fixedgrids = []

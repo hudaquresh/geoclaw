@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# encoding: utf-8
 
 r"""
 Module defines a class and routines for managing parameterized storm input.
@@ -248,8 +249,9 @@ class Storm(object):
          - *path* (string) Path to the file to be read.
         """
         if not single_storm: 
-            err_msg = "Implement when not single_storm."
-        
+            err_msg = "ATCF format stores storms individually. There is no \
+                        support for multiple storms."
+            return err_msg  
         else:
             # No header, can assume storm data
             data_block = []

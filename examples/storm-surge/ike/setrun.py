@@ -413,10 +413,7 @@ def setgeo(rundata):
     # Storm parameters - Parameterized storm (Holland 1980)
     data.storm_specification_type = 'holland80'  # (type 1)
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
-<<<<<<< HEAD
-=======
                                          'ike.storm'))
->>>>>>> geoclaw-mandli/new-storm-module
 
     # Convert ATCF data to GeoClaw format
     clawutil.data.get_remote_file(

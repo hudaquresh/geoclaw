@@ -23,7 +23,7 @@ module friction_module
     logical, private :: module_setup = .false.
 
     ! Parameters
-    integer, public, parameter :: friction_index = 4
+    integer, public :: friction_index
 
     ! Whether to use variable friction and what type to specify
     logical, public :: variable_friction
@@ -83,7 +83,8 @@ contains
             endif
 
             ! Basic switch to turn on variable friction
-            read(unit,*) variable_friction
+            read(unit, *) variable_friction
+            read(unit, *) friction_index
             read(unit,'(a)')
 
             if (variable_friction) then
@@ -155,11 +156,11 @@ contains
                             friction_regions(m)%upper(1) >= x .and.  &
                             friction_regions(m)%upper(2) >= y) then
 
+                            ! sea_level is not set properly here, just a test case 
+                            
                             do k=1,size(friction_regions(m)%depths) - 1
-                                if (friction_regions(m)%depths(k+1)            &
-                                                <= aux(1,i,j) - sea_level.and. &
-                                    friction_regions(m)%depths(k)              &
-                                                 > aux(1,i,j) - sea_level) then
+                                if (friction_regions(m)%depths(k+1) <= aux(1,i,j) - sea_level &
+                                    .and. friction_regions(m)%depths(k) > aux(1,i,j) - sea_level) then
 
                                     aux(friction_index,i,j) = &
                                      friction_regions(m)%manning_coefficients(k)

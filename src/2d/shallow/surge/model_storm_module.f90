@@ -61,12 +61,15 @@ module model_storm_module
     ! Storm field ramping width - Represents crudely the ramping radial area
     real(kind=8), parameter :: RAMP_WIDTH = 100.0d3
 
+    ! Time tracking tolerance allowance - allows for the beginning of the storm
+    ! track to be close to but not equal the start time of the simulation
+    real(kind=8), parameter :: TRACKING_TOLERANCE = 1d-10
 
 contains
 
 
     ! Setup routine for model storms
-    subroutine set_storm(storm_data_path, storm, model_type, log_unit)
+    subroutine set_storm(storm_data_path, storm, storm_spec_type, log_unit)
 
         use geoclaw_module, only: deg2rad, spherical_distance, coordinate_system
         use amr_module, only: t0, rinfinity
@@ -76,17 +79,12 @@ contains
         ! Subroutine I/O
         character(len=*), optional :: storm_data_path
         type(model_storm_type), intent(inout) :: storm
-        integer, intent(in) :: model_type, log_unit
+        integer, intent(in) :: storm_spec_type, log_unit
 
         ! Local storage
         integer, parameter :: data_file = 701
         integer :: i, k, io_status
         real(kind=8) :: x(2), y(2), ds, dt
-
-        ! Storm line reading format
-        character(len=*), parameter :: storm_format = "(7d18.8)"
-
-        character(len=256) :: line
 
         if (.not. module_setup) then
 
@@ -155,9 +153,11 @@ contains
             storm%velocity(:, storm%num_casts) = storm%velocity(:,  &
                                                             storm%num_casts - 1)
 
-            if (t0 < storm%track(1, 1)) then
-                print *,t0,storm%track(1, 1)
-                stop "Start time is before first forecast time."
+            if (t0 <= storm%track(1, 1) - TRACKING_TOLERANCE) then
+                print *, "Start time", t0, " is outside of the tracking"
+                print *, "tolerance range with the track start"
+                print *, storm%track(1, 1), "."
+                stop
             endif
 
             ! This is used to speed up searching for correct storm data
@@ -189,7 +189,7 @@ contains
     !  storm_location(t,storm)
     !    Interpolate location of hurricane in the current time interval
     ! ==========================================================================
-    function storm_location(t,storm) result(location)
+    function storm_location(t, storm) result(location)
 
         implicit none
 
@@ -201,10 +201,10 @@ contains
         real(kind=8) :: location(2)
 
         ! Junk storage
-        real(kind=8) :: junk(2)
+        real(kind=8) :: junk(6)
 
-        call get_storm_data(t,storm,location, junk, junk(1), junk(1), junk(1), &
-                                                    junk(1))
+        call get_storm_data(t, storm, location,                 &
+                                  junk(1:2), junk(3), junk(4), junk(5), junk(6))
 
     end function storm_location
 
@@ -221,11 +221,11 @@ contains
         type(model_storm_type), intent(in) :: storm
 
         ! Locals
-        real(kind=8) :: junk(2), velocity(2)
+        real(kind=8) :: junk(6), velocity(2)
 
         ! Fetch velocity of storm which has direction encoded in it
-        call get_storm_data(t, storm, junk, velocity, junk(1), junk(1),        &
-                                                      junk(1), junk(1))
+        call get_storm_data(t, storm, junk(1:2), velocity, junk(3), junk(4),   &
+                                                      junk(5), junk(6))
 
         ! Unit directional vector
         theta = atan2(velocity(2),velocity(1))
@@ -236,7 +236,7 @@ contains
     !  storm_index(t,storm)
     !    Finds the index of the next storm data point
     ! ==========================================================================
-    integer pure function storm_index(t,storm) result(index)
+    integer pure function storm_index(t, storm) result(index)
 
         implicit none
 
@@ -257,7 +257,13 @@ contains
         else
             t0 = storm%track(1,last_storm_index - 1)
             t1 = storm%track(1,last_storm_index)
-            if (t0 < t .and. t <= t1) then
+
+            ! Check to see if we are close enough to the current index to just
+            ! use that, tolerance is based on TRACKING_TOLERANCE
+            if ((abs(t0 - t) < TRACKING_TOLERANCE) .or.   &
+                (abs(t1 - t) < TRACKING_TOLERANCE) .or.   &
+                (t0 < t .and. t < t1)) then
+                
                 index = last_storm_index
             else if ( t1 < t ) then
                 found = .false.
@@ -271,7 +277,8 @@ contains
                 if (.not. found) then
                     index = storm%num_casts + 1
                 endif
-            else ! t <= t0
+            else
+                ! Fail gracefully
                 if (last_storm_index == 2) then
                     index = -1
                 else
@@ -298,7 +305,7 @@ contains
         implicit none
 
         ! Input
-        real(kind=8), intent(in) :: t                       ! Current time
+        real(kind=8), intent(in) :: t                 ! Current time
         type(model_storm_type), intent(in) :: storm   ! Storm
 
         ! Output
@@ -355,7 +362,7 @@ contains
                   storm%central_pressure(i), storm%radius(i)]
             fnm = [storm%track(2:3,i - 1),storm%velocity(:,i - 1), &
                    storm%max_wind_radius(i - 1),storm%max_wind_speed(i - 1), &
-                  storm%central_pressure(i - 1), storm%radius(i - 1)]
+                   storm%central_pressure(i - 1), storm%radius(i - 1)]
             fn = weight * (fn - fnm) + fnm
         endif
 
@@ -366,9 +373,6 @@ contains
         max_wind_speed = fn(6)
         central_pressure = fn(7)
         radius = fn(8)
-
-        print *, fn
-        stop
 
     end subroutine get_storm_data
 
@@ -408,7 +412,7 @@ contains
 
         ! Get interpolated storm data
         call get_storm_data(t, storm, sloc, tv, mwr, mws, Pc, radius)
-        
+
         ! Other quantities of interest
         Pa = ambient_pressure
 
@@ -432,8 +436,8 @@ contains
         if (B <  1.d0) B = 1.d0
         if (B > 2.5d0) B = 2.5d0
 
-        if (DEBUG) print "('Holland B = ',d16.8)",B
-        if (DEBUG) print "('Holland A = ',d16.8)",(mwr / 1000.d0)**B
+        if (DEBUG) print "('Holland B = ',d16.8)", B
+        if (DEBUG) print "('Holland A = ',d16.8)", (mwr / 1000.d0)**B
         
         ! Set fields
         do j=1-mbc,my+mbc
@@ -454,7 +458,7 @@ contains
                 wind = sqrt((mwr / r)**B &
                         * exp(1.d0 - (mwr / r)**B) * mws**2.d0 &
                         + (r * f)**2.d0 / 4.d0) - r * f / 2.d0
-
+                
                 ! Convert wind velocity from top of atmospheric boundary layer
                 ! (which is what the Holland curve fit produces) to wind
                 ! velocity at 10 m above the earth's surface
@@ -484,6 +488,7 @@ contains
                 aux(wind_index:wind_index+1,i,j) =                        &
                                         aux(wind_index:wind_index+1,i,j)  &
                                         * ramp
+
             enddo
         enddo
 

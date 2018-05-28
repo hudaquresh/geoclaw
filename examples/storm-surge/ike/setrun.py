@@ -329,6 +329,8 @@ def setrun(claw_pkg='geoclaw'):
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
 
+    rundata.gaugedata.aux_out_fields = [4, 5, 6]
+
     # ------------------------------------------------------------------
     # GeoClaw specific parameters:
     # ------------------------------------------------------------------
@@ -411,7 +413,13 @@ def setgeo(rundata):
     data.R_refine = [60.0e3, 40e3, 20e3]
 
     # Storm parameters - Parameterized storm (Holland 1980)
-    data.storm_specification_type = 'holland80'  # (type 1)
+    #data.storm_specification_type = 'holland80'  # (type 1)
+    #data.storm_specification_type = 'holland10'  # (type 2)
+    #data.storm_specification_type = 'CLE'  # (type 3)
+    #data.storm_specification_type = 'SLOSH'  # (type 4)
+    #data.storm_specification_type = 'rankine'  # (type 5)
+    #data.storm_specification_type = 'modified-rankine'  # (type 6)
+    data.storm_specification_type = 'DeMaria'  # (type 7)
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
                                          'ike.storm'))
 

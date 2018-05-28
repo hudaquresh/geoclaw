@@ -181,8 +181,15 @@ def setplot(plotdata=None):
 
     # Plot surface as blue curve:
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = 3
-    plotitem.plotstyle = 'b-'
+    #plotitem.plot_var = 3
+    plotitem.plotstyle = 'r-'
+
+    # Test Code  
+    ## Plot q[0] from previous run as red line:
+    #plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    #plotitem.plot_var = 0
+    #plotitem.plotstyle = 'r-'
+    ##plotitem.outdir = '_output'
 
     #
     #  Gauge Location Plot

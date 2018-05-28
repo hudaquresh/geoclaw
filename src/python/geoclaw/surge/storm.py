@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
 r"""
 Module defines a class and routines for managing parameterized storm input.
@@ -15,6 +14,8 @@ Module defines a class and routines for managing parameterized storm input.
     - Holland 1980
     - Holland 2010
     - Chavas, Lin, Emmanuel 2015
+    - SLOSH
+    - TODO: ADD ALL THE REST OF THE WIND MODELS SUPPORTED 
 """
 
 from __future__ import print_function
@@ -1076,17 +1077,30 @@ class Storm(object):
 #  - Holland 1980 ('HOLLAND_1980') [1]
 #  - Holland 2010 ('HOLLAND_2010') [2]
 #  - Chavas, Lin, Emmanuel ('CLE_2015') [3]
+#  - SLOSH ('SLOSH') [4] 
+#  - Rankine ('RANKINE') [3]
 # *TODO* - Add citations
 
 # Dictionary of models.  Keys are function names, values are the proper name
 # and a citation to the model
-_supported_models = {"holland_1980": ["Holland 1980", "Holland, G. J. An Analytic Model of the Wind and Pressure Profiles in Hurricanes. Monthly Weather Review 108, 1212-1218 (1980)."],
-                    "holland_2010": ["Holland 2010", "Holland, G. J., Belanger, J. I. & Fritz, A. A Revised Model for Radial Profiles of Hurricane Winds. Monthly Weather Review 138, 4393-4393 (2010)."], 
-                    "cle_2015": ["Chavas, Lin, Emmanuel 2015", "Chavas, D. R., Lin, N. & Emanuel, K. A Model for the Complete Radial Structure of the Tropical Cyclone Wind Field. Part I: Comparison with Observed Structure*. http://dx.doi.org.ezproxy.cul.columbia.edu/10.1175/JAS-D-15-0014.1 72, 3647-3662 (2015)."]}
+#_supported_models = {"holland_1980": ["Holland 1980", "Holland, G. J. An Analytic Model of the Wind and Pressure Profiles in Hurricanes. Monthly Weather Review 108, 1212-1218 (1980)."], "holland_2010": ["Holland 2010", "Holland, G.
+#J., Belanger, J. I. & Fritz, A. A Revised Model for Radial Profiles of Hurricane
+#Winds. Monthly Weather Review 138, 4393-4393 (2010)."],"cle_2015": ["Chavas,
+#Lin, Emmanuel 2015", "Chavas, D. R., Lin, N. & Emanuel, K. A Model for the
+#Complete Radial Structure of the Tropical Cyclone Wind Field. Part I: Comparison
+#with Observed Structure*.
+#http://dx.doi.org.ezproxy.cul.columbia.edu/10.1175/JAS-D-15-0014.1 72, 3647-3662
+#(2015)."], "SLOSH": ["Citation Needed."], "rankine": ["Citation Needed."]}}
 
+_supported_models = {"holland_1980": ["Citation Needed."],
+                     "holland_2010": ["Citation Needed."],  
+                     "cle_2015": ["Citation Needed."],
+                     "slosh": ["Citation Needed."],
+                     "rankine": ["Citation Needed."]} 
 
 # In the case where the field is not rotationally symmetric then the r value
 # defines the x and y axis extents.
+
 def construct_fields(storm, r, t, model="holland_1980"):
     r""""""
 
@@ -1112,6 +1126,16 @@ def holland_2010(storm, r, t):
 def cle_2015(storm, r, t):
     r""""""
     raise NotImplementedError("CLE 2015 model has not been implemeted.")
+    return None, None
+
+def slosh(storm, r, t): 
+    r""""""
+    raise NotImplementedError("SLOSH model has not been implemeted.")
+    return None, None
+
+def rankine(storm, r, t): 
+    r""""""
+    raise NotImplementedError("SLOSH model has not been implemeted.")
     return None, None
 
 

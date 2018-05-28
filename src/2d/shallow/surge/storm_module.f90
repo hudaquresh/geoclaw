@@ -108,6 +108,10 @@ contains
         use model_storm_module, only: set_holland_1980_fields
         use model_storm_module, only: set_holland_2010_fields
         use model_storm_module, only: set_CLE_fields
+        use model_storm_module, only: set_SLOSH_fields
+        use model_storm_module, only: set_rankine_fields
+        use model_storm_module, only: set_modified_rankine_fields
+        use model_storm_module, only: set_deMaria_fields
 
         ! use data_storm_module, only: set_data_storm => set_storm
         use data_storm_module, only: set_HWRF_fields
@@ -193,7 +197,7 @@ contains
 
             ! Use parameterized storm model
             if (0 < storm_specification_type .and.              &
-                    storm_specification_type <=3) then
+                    storm_specification_type <=7) then
                 select case(storm_specification_type)
                     case(1) ! Holland 1980 model
                         set_model_fields => set_holland_1980_fields
@@ -201,6 +205,14 @@ contains
                         set_model_fields => set_holland_2010_fields
                     case(3) ! Chavas, Lin, Emmanuel model
                         set_model_fields => set_CLE_fields
+                    case(4) ! SLOSH model
+                        set_model_fields => set_SLOSH_fields
+                    case(5) ! Rankine model
+                        set_model_fields => set_rankine_fields
+                    case(6) ! Modified Rankine model
+                        set_model_fields => set_modified_rankine_fields
+                    case(7) ! DeMaria model
+                        set_model_fields => set_deMaria_fields
                 end select
                 call set_model_storm(storm_file_path, model_storm,         &
                                      storm_specification_type, log_unit)

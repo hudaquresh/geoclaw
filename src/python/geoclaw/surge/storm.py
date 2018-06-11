@@ -237,10 +237,10 @@ class Storm(object):
         self.central_pressure = data[:, 5]
         self.storm_radius = data[:, 6]
 
-#    def read_atcf(self, path, verbose=False):
+    def read_atcf(self, path, single_storm=True, verbose=False):
 
-    def read_atcf(self, path, single_storm=True, name=None, year=None,
-                                verbose=False):
+    #def read_atcf(self, path, single_storm=True, name=None, year=None,
+                                #verbose=False):
         r"""Read in a ATCF formatted storm file
 
         ATCF format has storm stored individually so there is no support for
@@ -249,20 +249,28 @@ class Storm(object):
         :Input:
          - *path* (string) Path to the file to be read.
         """
-        if not single_storm: 
-            err_msg = "ATCF format stores storms individually. There is no \
-                        support for multiple storms."
-            return err_msg  
-        else:
-            # No header, can assume storm data
-            data_block = []
-            with open(path, 'r') as ATCF_file:
-                for line in ATCF_file:
-                    line = line.split(",")
-                    line = [value.strip() for value in line]
-                    data_block.append(line)
-            num_lines = len(data_block)
+        #if not single_storm: 
+        #    err_msg = "ATCF format stores storms individually. There is no \
+        #                support for multiple storms."
+        #    return err_msg  
+        #else:
+        #    # No header, can assume storm data
+        #    data_block = []
+        #    with open(path, 'r') as ATCF_file:
+        #        for line in ATCF_file:
+        #            line = line.split(",")
+        #            line = [value.strip() for value in line]
+        #            data_block.append(line)
+        #    num_lines = len(data_block)
 
+        # No header, can assume storm data
+        data_block = []
+        with open(path, 'r') as ATCF_file:
+            for line in ATCF_file:
+                line = line.split(",")
+                line = [value.strip() for value in line]
+                data_block.append(line)
+        num_lines = len(data_block)
 
         # Parse data block - convert to correct units
         # Conversions:
@@ -287,7 +295,8 @@ class Storm(object):
 
             # Mark if this is a shortened line
             short_data = len(data) < 19
-
+            print('short_data:', short_data) 
+            print('i:', i) 
             # Create time
             self.t.append(datetime.datetime(int(data[2][:4]),
                                             int(data[2][4:6]),
@@ -1135,9 +1144,18 @@ def slosh(storm, r, t):
 
 def rankine(storm, r, t): 
     r""""""
-    raise NotImplementedError("SLOSH model has not been implemeted.")
+    raise NotImplementedError("Rankine model has not been implemeted.")
     return None, None
 
+def modified_rankine(storm, r, t): 
+    r""""""
+    raise NotImplementedError("Modified Rankine model has not been implemeted.")
+    return None, None
+
+def deMaria(storm, r, t): 
+    r""""""
+    raise NotImplementedError("DeMaria model has not been implemeted.")
+    return None, None
 
 # =============================================================================
 # Utility functions

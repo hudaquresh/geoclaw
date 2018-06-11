@@ -333,6 +333,7 @@ class Storm(object):
                                         * 1000.0)
                 self.max_wind_radius[i] = (float(data[19]) * 1.852000003180799
                                            * 1000.0)
+                                           
 
     def read_hurdat(self, path, single_storm=True, name=None, year=None,
                                 verbose=False):

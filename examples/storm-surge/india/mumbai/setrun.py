@@ -9,10 +9,17 @@ that will be read in by the Fortran code.
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 import os
 import datetime
+import shutil
+import gzip
 
 import numpy as np
+
+from clawpack.geoclaw.surge.storm import Storm
+import clawpack.clawutil as clawutil
+
 
 storm_num = 0 
 if storm_num == 0:  
@@ -33,10 +40,12 @@ elif storm_num == 1200:
                         datetime.datetime(2003, 1,1, 0)
     final_forecast = datetime.datetime(2003, 5, 22, 2) - \
                         datetime.datetime(2003, 5, 10, 6) 
+
  
-#                           days   s/hour    hours/day            
-days2seconds = lambda days: days * 60.0**2 * 24.0
-seconds2days = lambda seconds: seconds / (60.0**2 * 24.0)
+# Time Conversions
+def days2seconds(days):
+    return days * 60.0**2 * 24.0
+
 
 # Scratch directory for storing topo and dtopo files:
 scratch_dir = os.path.join(os.environ["CLAW"], 'geoclaw', 'scratch')
@@ -119,6 +128,7 @@ def setrun(claw_pkg='geoclaw'):
     # Initial time:
     # -------------
     clawdata.t0 = days2seconds(landfall.days) + landfall.seconds
+    #  clawdata.t0 = days2seconds(landfall.days) + landfall.seconds
 
     # Restart from checkpoint file of a previous run?
     # If restarting, t0 above should be from original run, and the
@@ -368,9 +378,9 @@ def setrun(claw_pkg='geoclaw'):
     # ------------------------------------------------------------------
     rundata = setgeo(rundata)
 
-    # Test whether this fixes issues 
-    rundata = set_storm(rundata)
-    rundata = set_friction(rundata)
+    ## Test whether this fixes issues 
+    #rundata = set_storm(rundata)
+    #rundata = set_friction(rundata)
 
     return rundata
     # end of function setrun
@@ -478,11 +488,19 @@ def set_storm(rundata):
     data.wind_refine = [20.0, 40.0, 60.0] # m/s 
     data.R_refine = [60.0e3, 40e3, 20e3]  # m 
 
-    # Storm parameters - Parameterized storm (Holland 1980)
-    data.storm_type = 1
-    data.landfall = days2seconds(landfall.days) + landfall.seconds
-    data.display_landfall_time = True
+    ## Storm parameters - Parameterized storm (Holland 1980)
+    #data.storm_type = 1
+    #data.landfall = days2seconds(landfall.days) + landfall.seconds
+    #data.display_landfall_time = True
 
+    # Storm parameters - Parameterized storm (Holland 1980)
+    data.storm_specification_type = 'holland80'  # (type 1)
+    #data.storm_specification_type = 'holland10'  # (type 2)
+    #data.storm_specification_type = 'CLE'  # (type 3)
+    #data.storm_specification_type = 'SLOSH'  # (type 4)
+    #data.storm_specification_type = 'rankine'  # (type 5)
+    #data.storm_specification_type = 'modified-rankine'  # (type 6)
+    #data.storm_specification_type = 'DeMaria'  # (type 7)
 
     # Storm type 1 - Idealized storm track
     data.storm_file = os.path.expandvars(os.path.join(os.getcwd(),
@@ -520,7 +538,7 @@ if __name__ == '__main__':
         rundata = setrun(sys.argv[1])
     else:
         rundata = setrun()
-    #rundata = set_storm(rundata)
-    #rundata = set_friction(rundata)
+    rundata = set_storm(rundata)
+    rundata = set_friction(rundata)
 
     rundata.write()

@@ -329,6 +329,10 @@ def setrun(claw_pkg='geoclaw'):
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
 
+<<<<<<< HEAD
+=======
+    # Force the gauges to also record the wind and pressure fields
+>>>>>>> geoclaw-mandli/new-storm-module
     rundata.gaugedata.aux_out_fields = [4, 5, 6]
 
     # ------------------------------------------------------------------
@@ -401,7 +405,7 @@ def setgeo(rundata):
     # ================
     data = rundata.surge_data
 
-    # Source term controls - These are currently not respected
+    # Source term controls
     data.wind_forcing = True
     data.drag_law = 1
     data.pressure_forcing = True
@@ -433,7 +437,7 @@ def setgeo(rundata):
             open(atcf_path, 'w') as atcf_unzipped_file:
         atcf_unzipped_file.write(atcf_file.read().decode('ascii'))
 
-    ike = Storm(path=atcf_path, file_format="ATCF", single_storm=True)
+    ike = Storm(path=atcf_path, file_format="ATCF")
 
     # Calculate landfall time - Need to specify as the file above does not
     # include this info (9/13/2008 ~ 7 UTC)

@@ -1127,7 +1127,7 @@ def available_models():
 
 # =============================================================================
 # Ensmeble Storm Formats
-def load_emmanuel_storms(path, mask_distance=None, mask_coordinate=(0.0, 0.0),
+def load_emanuel_storms(path, mask_distance=None, mask_coordinate=(0.0, 0.0),
                                mask_category=None, categorization="NHC"):
     r"""Load storms from a Matlab file containing storms
 

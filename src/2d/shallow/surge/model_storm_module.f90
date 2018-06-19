@@ -1001,8 +1001,8 @@ contains
 
         ! Input variables 
         real(kind=8), intent(in) :: f, r_0, r_a
-        real(kind=8), dimension(1:res) :: m_out
         integer, intent(in) :: res 
+        real(kind=8), dimension(1:res) :: m_out
 
         ! Parameters and Other variables 
         real(kind=8) :: V_m, dr, r_guess, r_p 

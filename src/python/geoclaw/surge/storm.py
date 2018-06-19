@@ -6,27 +6,12 @@ testing reconstructed wind and pressure fields.  Additionally some support for
 ensembles of storms from various providers is also included.
 
 :Formats Supported:
-<<<<<<< HEAD
-    - GeoClaw
-    - ATCF
-    - HURDAT
-    - JMA
-    - IMD
-
-:Models Supported:
-    - Holland 1980
-    - Holland 2010
-    - Chavas, Lin, Emmanuel 2015
-    - SLOSH
-    - TODO: ADD ALL THE REST OF THE WIND MODELS SUPPORTED 
-=======
     - GeoClaw (fully)
     - ATCF (reading only)
     - HURDAT (reading only)
     - JMA (reading only)
     - IMD (planned)
     - tcvitals (planned)
->>>>>>> geoclaw-mandli/new-storm-module
 """
 
 from __future__ import print_function
@@ -305,18 +290,11 @@ class Storm(object):
             if len(data) == 0:
                 break
 
-<<<<<<< HEAD
-            # Mark if this is a shortened line
-            short_data = len(data) < 19
-            print('short_data:', short_data) 
-            print('i:', i) 
-=======
             # Grab data regarding basin and cyclone number if we are starting
             if i == 0:
                 self.basin = ATCF_basins[data[0]]
                 self.ID = int(data[1])
 
->>>>>>> geoclaw-mandli/new-storm-module
             # Create time
             self.t.append(datetime.datetime(int(data[2][:4]),
                                             int(data[2][4:6]),
@@ -1070,6 +1048,10 @@ _supported_models = {"holland_1980": ["Citation Needed."],
                      "cle_2015": ["Citation Needed."],
                      "slosh": ["Citation Needed."],
                      "rankine": ["Citation Needed."]} 
+#_supported_models = {"holland_1980": ["Holland 1980", "Holland, G. J. An Analytic Model of the Wind and Pressure Profiles in Hurricanes. Monthly Weather Review 108, 1212-1218 (1980)."],
+#                     "holland_2010": ["Holland 2010", "Holland, G. J., Belanger, J. I. & Fritz, A. A Revised Model for Radial Profiles of Hurricane Winds. Monthly Weather Review 138, 4393–4393 (2010)."],
+#                     "cle_2015": ["Chavas, Lin, Emmanuel 2015", "Chavas, D. R., Lin, N. & Emanuel, K. A Model for the Complete Radial Structure of the Tropical Cyclone Wind Field. Part I: Comparison with Observed Structure*. http://dx.doi.org.ezproxy.cul.columbia.edu/10.1175/JAS-D-15-0014.1 72, 3647–3662 (2015)."]}
+#
 
 # In the case where the field is not rotationally symmetric then the r value
 # defines the x and y axis extents.

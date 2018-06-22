@@ -94,11 +94,12 @@ def setplot(plotdata=None, bathy_location=0.15, bathy_angle=0.0,
         pass
 
     def bathy_ref_lines(current_data):
-        axes = plt.gca()
         for ref_line in ref_lines:
             x1 = ref_line[0][0]
             y1 = ref_line[0][1]
             x2 = ref_line[1][0]
+            y2 =  ref_line[1][1]
+            plt.plot([x1,x2],[y1,y2],'y--',linewidth=1)
             y2 = ref_line[1][1]
             axes.plot([x1, x2], [y1, y2], 'y--', linewidth=1)
 

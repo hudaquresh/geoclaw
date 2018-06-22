@@ -134,7 +134,6 @@ def surge_afteraxes(current_data, track, land_fall=0.0, plot_direction=False,
 def friction(cd):
     return cd.aux[friction_field, :, :]
 
-
 def wind_x(cd):
     return cd.aux[wind_field, :, :]
 

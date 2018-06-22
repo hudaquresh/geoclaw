@@ -239,7 +239,7 @@ def setrun(claw_pkg='geoclaw'):
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
-    clawdata.checkpt_style = 0
+    clawdata.checkpt_style = 0 
 
     if clawdata.checkpt_style == 0:
         # Do not checkpoint at all

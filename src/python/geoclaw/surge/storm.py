@@ -1232,6 +1232,8 @@ def load_emanuel_storms(path, mask_distance=None, mask_coordinate=(0.0, 0.0),
                                      month[n, i],
                                      day[n, i],
                                      hour[n, i]) for i in range(m)]
+        
+        storm.time_offset = storm.t[0] 
 
         storm.eye_location = numpy.empty((m, 2))
         storm.max_wind_speed = numpy.empty(m)

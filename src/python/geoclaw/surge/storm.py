@@ -1048,13 +1048,10 @@ _supported_models = {"holland_1980": ["Citation Needed."],
                      "cle_2015": ["Citation Needed."],
                      "slosh": ["Citation Needed."],
                      "rankine": ["Citation Needed."]} 
-#_supported_models = {"holland_1980": ["Holland 1980", "Holland, G. J. An Analytic Model of the Wind and Pressure Profiles in Hurricanes. Monthly Weather Review 108, 1212-1218 (1980)."],
-#                     "holland_2010": ["Holland 2010", "Holland, G. J., Belanger, J. I. & Fritz, A. A Revised Model for Radial Profiles of Hurricane Winds. Monthly Weather Review 138, 4393–4393 (2010)."],
-#                     "cle_2015": ["Chavas, Lin, Emmanuel 2015", "Chavas, D. R., Lin, N. & Emanuel, K. A Model for the Complete Radial Structure of the Tropical Cyclone Wind Field. Part I: Comparison with Observed Structure*. http://dx.doi.org.ezproxy.cul.columbia.edu/10.1175/JAS-D-15-0014.1 72, 3647–3662 (2015)."]}
-#
 
-# In the case where the field is not rotationally symmetric then the r value
-# defines the x and y axis extents.
+
+## In the case where the field is not rotationally symmetric then the r value
+## defines the x and y axis extents.
 
 def construct_fields(storm, r, t, model="holland_1980"):
     r""""""
@@ -1185,10 +1182,10 @@ def load_emanuel_storms(path, mask_distance=None, mask_coordinate=(0.0, 0.0),
 
         storm.eye_location[:, 0] = lon[n, :m]
         storm.eye_location[:, 1] = lat[n, :m]
-        storm.max_wind_speed = max_wind_speed[n, :m]
-        storm.max_wind_radius = max_wind_radius[n, :m]
-        storm.central_pressure = central_pressure[n, :m]
-        storm.storm_radius = numpy.ones(m) * 300e3
+        storm.max_wind_speed = max_wind_speed[n, :m] * 0.51444444 
+        storm.max_wind_radius = max_wind_radius[n, :m] * 1000
+        storm.central_pressure = central_pressure[n, :m] * 100 
+        storm.storm_radius = numpy.ones(m) * 400e3
 
         include_storm = True
         if mask_distance is not None:

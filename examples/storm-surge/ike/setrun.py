@@ -329,10 +329,6 @@ def setrun(claw_pkg='geoclaw'):
                                      rundata.clawdata.t0,
                                      rundata.clawdata.tfinal])
 
-<<<<<<< HEAD
-=======
-    # Force the gauges to also record the wind and pressure fields
->>>>>>> geoclaw-mandli/new-storm-module
     rundata.gaugedata.aux_out_fields = [4, 5, 6]
 
     # ------------------------------------------------------------------

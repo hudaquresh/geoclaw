@@ -1182,7 +1182,7 @@ def load_emanuel_storms(path, mask_distance=None, mask_coordinate=(0.0, 0.0),
 
         storm.eye_location[:, 0] = lon[n, :m]
         storm.eye_location[:, 1] = lat[n, :m]
-        storm.max_wind_speed = max_wind_speed[n, :m] * 0.51444444 
+        storm.max_wind_speed = max_wind_speed[n, :m] 
         storm.max_wind_radius = max_wind_radius[n, :m] * 1000
         storm.central_pressure = central_pressure[n, :m] * 100 
         storm.storm_radius = numpy.ones(m) * 400e3

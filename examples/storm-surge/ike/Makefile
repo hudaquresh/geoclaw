@@ -21,8 +21,10 @@ PLOTDIR = _plots               # Directory for plots
 
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 #FFLAGS ?=
-FFLAGS += -DNETCDF -lnetcdff -I$(NETCDF4_DIR)/include -L$(NETCDF4_DIR)/lib
-LFLAGS += -fopenmp -L$(NETCDF4_DIR)/lib -lnetcdff
+#FFLAGS += -DNETCDF -lnetcdff -I$(NETCDF4_DIR)/include -L$(NETCDF4_DIR)/lib
+#LFLAGS += -fopenmp -L$(NETCDF4_DIR)/lib -lnetcdff
+FFLAGS ?= -O0 -W -Wall -fbounds-check -fcheck=all -pedantic-errors -Wunderflow
+-fbacktrace -ffpe-trap=invalid,zero,overflow -g
 
 # ---------------------------------
 # package sources for this program:

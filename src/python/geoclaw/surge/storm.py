@@ -1200,13 +1200,18 @@ def load_emanuel_storms(path, mask_distance=None, mask_coordinate=(0.0, 0.0),
         storm.eye_location[:, 0] = lon[n, :m]
         storm.eye_location[:, 1] = lat[n, :m]
         storm.max_wind_speed = max_wind_speed[n, :m]
-        for i in range(m):
-            max_wind_radius[n, i] = units.convert(max_wind_radius[n, i],
-                                                               'km', 'm')
-            central_pressure[n, i] = units.convert(central_pressure[n, i],  
-                                                               'hPa', 'Pa') 
-        storm.max_wind_radius = max_wind_radius[n, :m] 
-        storm.central_pressure = central_pressure[n, :m] 
+        
+        storm.max_wind_radius = units.convert(max_wind_radius[n, :m], 
+                                                             'km', 'm')  
+        storm.central_pressure = units.convert(central_pressure[n, :m],  
+                                                             'km', 'm')  
+        #for i in range(m):
+        #    max_wind_radius[n, i] = units.convert(max_wind_radius[n, i],
+        #                                                       'km', 'm')
+        #    central_pressure[n, i] = units.convert(central_pressure[n, i],  
+        #                                                       'hPa', 'Pa') 
+        #storm.max_wind_radius = max_wind_radius[n, :m] 
+        #storm.central_pressure = central_pressure[n, :m] 
         storm.storm_radius = numpy.ones(m) * 300e3
 
         include_storm = True

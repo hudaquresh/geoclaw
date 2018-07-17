@@ -5,18 +5,34 @@ Module defines a class and routines for managing storm best-track type input and
 testing reconstructed wind and pressure fields.  Additionally some support for 
 ensembles of storms from various providers is also included.
 
+The primary class of interest in the module is the `Storm` class that
+facilitates dealing with various best-track formats found around the world and
+the expected GeoClaw storm format that is read into the FORTRAN code.  The basic
+workflow in a `setrun.py` file would do the following:
+
+1. Create a `Storm` object by reading in from a file::
+
+    storm = clawpack.geoclaw.surge.storm.Storm("my_storm.txt", file_format='ATCF')
+
+2. Write out the storm object created into the GeoClaw format::
+
+    storm.write("my_geoclaw_storm.txt", file_format="geoclaw")
+
+3. Specify the path to the GeoClaw formatted storm file, in this case 
+   "my_geoclaw_storm.txt".
+
 :Formats Supported:
     - GeoClaw (fully)
     - ATCF (reading only)
     - HURDAT (reading only)
+    - IBTrACS (reading only)
     - JMA (reading only)
     - IMD (planned)
-    - tcvitals (planned)
+    - tcvitals (reading only)
 """
 
 from __future__ import print_function
 from __future__ import absolute_import
-
 from six.moves import range
 
 import warnings
@@ -43,6 +59,18 @@ ATCF_basins = {"AL": "Atlantic",
                "SL": "Southern Atlantic",
                "LS": "Southern Atlantic",
                "WP": "North West Pacific"}
+
+# TCVitals basins with their expanded names
+# see http://www.emc.ncep.noaa.gov/HWRF/tcvitals-draft.html
+TCVitals_Basins = {"L": "North Atlantic",
+                   "E": "North East Pacific",
+                   "C": "North Central Pacific",
+ 		   "W": "North West Pacific",
+		   "B": "Bay of Bengal (North Indian Ocean)",
+		   "A": "Arabian Sea (North Indian Ocean)",
+		   "Q": "South Atlantic",
+		   "P": "South Pacific",
+		   "S": "South Indian Ocean"}
 
 # Tropical Cyclone Designations
 # see https://www.nrlmry.navy.mil/atcf_web/docs/database/new/abrdeck.html
@@ -106,9 +134,9 @@ class Storm(object):
        Note that when written some formats require a *time_offset* to be set.
      - *eye_location* (ndarray(:, :)) location of the eye of the storm.
        Default units are in signed decimcal longitude and latitude.
-     - *max_wind_speed (ndarray(:)) Maximum wind speed.  Default units are
+     - *max_wind_speed* (ndarray(:)) Maximum wind speed.  Default units are
        meters/second.
-     - *max_wind_radius (ndarray(:)) Radius at which the maximum wind speed
+     - *max_wind_radius* (ndarray(:)) Radius at which the maximum wind speed
        occurs.  Default units are meters.
      - *central_pressure* (ndarray(:)) Central pressure of storm.  Default
        units are Pascals.
@@ -135,6 +163,7 @@ class Storm(object):
     _supported_formats = {"geoclaw": ["GeoClaw", "http://www.clawpack.org/storms"],
                           "atcf": ["ATCF", "http://www.nrlmry.navy.mil/atcf_web/docs/database/new/database.html"],
                           "hurdat": ["HURDAT", "http://www.aoml.noaa.gov/hrd/hurdat/Data_Storm.html"],
+                          "ibtracs": ["IBTrACS", "ftp://filsrv.cicsnc.org/kknapp/ibtracs/testing/hotel1/provisional"],
                           "jma": ["JMA", "http://www.jma.go.jp/jma/jma-eng/jma-center/rsmc-hp-pub-eg/Besttracks/e_format_bst.html"],
                           "imd": ["IMD", "http://www.rsmcnewdelhi.imd.gov.in/index.php"],
                           "tcvitals": ["TC-Vitals", "http://www.emc.ncep.noaa.gov/mmb/data_processing/tcvitals_description.htm"]}
@@ -183,7 +212,7 @@ class Storm(object):
 
         :Input:
          - *path* (string) Path to data file.
-         - *file_format (string) Format of the data file.  See list of
+         - *file_format* (string) Format of the data file.  See list of
            supported formats for a list of valid strings.  Defaults to
            "hurdat".
          - *kwargs* (dict) Keyword dictionary for additional arguments that can
@@ -204,6 +233,7 @@ class Storm(object):
                         "files:",
                         " - ATCF - http://ftp.nhc.noaa.gov/atcf/archive/",
                         " - HURDAT - http://www.aoml.noaa.gov/hrd/hurdat/Data_Storm.html",
+                        " - IBTrACS - ftp://filsrv.cicsnc.org/kknapp/ibtracs/testing/hotel1/provisional"
                         " - JMA - http://www.jma.go.jp/jma/jma-eng/jma-center/rsmc-hp-pub-eg/besttrack.html",
                         " - IMD - http://www.rsmcnewdelhi.imd.gov.in/index.php",
                         " - TCVITALS - http://www.emc.ncep.noaa.gov/mmb/data_processing/tcvitals_description.htm")
@@ -416,13 +446,13 @@ class Storm(object):
 
             # Parse eye location
             if data[4][-1] == "N":
-                self.eye_location[i, 0] = float(data[4][0:-1])
+                self.eye_location[i, 1] = float(data[4][0:-1])
             else:
-                self.eye_location[i, 0] = -float(data[4][0:-1])
+                self.eye_location[i, 1] = -float(data[4][0:-1])
             if data[5][-1] == "E":
-                self.eye_location[i, 1] = float(data[5][0:-1])
+                self.eye_location[i, 0] = float(data[5][0:-1])
             else:
-                self.eye_location[i, 1] = -float(data[5][0:-1])
+                self.eye_location[i, 0] = -float(data[5][0:-1])
 
             # Intensity information - radii are not included directly in this
             # format and instead radii of winds above a threshold are included
@@ -432,6 +462,92 @@ class Storm(object):
             self.max_wind_radius[i] = -1
             self.storm_radius[i] = -1
 
+    def read_ibtracs(self, path, storm_name, year):
+        r"""Read in IBTrACS formatted storm file
+
+        This reads in the netcdf-formatted IBTrACS v4 BETA data. The .nc
+        file passed as *path* must contain a storm matching *storm_name*
+        and *year*. This function will be updated, if needed, once the BETA
+        version becomes an operational release.
+
+        NOTE: Thus far, only the reading of hurdat/atcf-based best tracks (i.e. USA
+        tracks) is supported. 
+
+        TODO: account for data formats from other reporting agencies
+
+        For more details on the IBTrACS v4 BETA format and getting data see
+
+        ftp://filsrv.cicsnc.org/kknapp/ibtracs/testing/hotel1/provisional/
+
+        :Input:
+         - *path* (string) Path to the file to be read.
+         - *storm_name* (string) name of storm of interest (NAME field in IBTrACS).
+         - *year* (int) year of storm of interest
+
+        :Raises:
+         - *ValueError* If the method cannot find the name/year matching the
+           storm then a value error is risen.
+        """
+
+        # imports that you don't need for other read functions
+        import xarray as xr
+        from pandas import to_datetime
+
+        storm_name = storm_name.upper()
+        with xr.open_dataset(path,drop_variables=['time']) as ds:
+
+            ## SLICE IBTRACS DATASET
+
+            # match on storm-name and year
+            storm_match = (ds.name == storm_name.encode())
+            dts = xr.DataArray.from_series(to_datetime(ds.iso_time.astype(str).to_series())).values
+            ds.iso_time.values = dts
+            year_match = (ds.iso_time.dt.year == year).any(dim='time')
+            ds = ds.sel(storm=(year_match & storm_match)).squeeze()
+            # make sure 
+            if ('storm' in ds.dims.keys()) and (ds.storm.shape[0] == 0):
+                raise ValueError('Storm/year not found in provided file')
+
+            # include only valid time points for this storm
+            # i.e. when we have max wind values
+            ds = ds.sel(time=(ds.wmo_wind>=0))
+
+
+            ## CONVERT TO GEOCLAW FORMAT
+
+            # assign basin to be the basin where track originates
+            # in case track moves across basins
+            self.basin = ds.basin.values[0].astype(str)
+            self.name = storm_name
+            self.ID = ds.sid.astype(str).item()
+
+            # convert datetime64 to datetime.datetime
+            self.t = []
+            for d in ds.iso_time:
+                t = d.dt
+                self.t.append(datetime.datetime(t.year,t.month,t.day,t.hour,t.minute,t.second))
+
+            ## events
+            self.event = ds.usa_record.values.astype(str)
+
+            # time offset
+            self.time_offset = numpy.array(self.t)[self.event=='L'][-1]
+
+            # Classification, note that this is not the category of the storm
+            self.classification = ds.usa_status.values
+            self.eye_location = numpy.array([ds.lon,ds.lat]).T
+
+            # Intensity information - for now, including only common, basic intensity
+            # info.
+            # TODO: add more detailed info for storms that have it
+            self.max_wind_speed = units.convert(ds.wmo_wind,'knots','m/s').values
+            self.central_pressure = units.convert(ds.wmo_pres,'mbar','Pa').values
+            self.max_wind_radius = units.convert(ds.usa_rmw,'nmi','m').where(
+                    ds.usa_rmw >= 0,-1).values
+            self.storm_radius = units.convert(ds.usa_roci,'nmi','m').where(
+                    ds.usa_roci >= 0,-1).values
+
+            
     def read_jma(self, path, verbose=False):
         r"""Read in JMA formatted storm file
 
@@ -498,6 +614,7 @@ class Storm(object):
             self.max_wind_radius[i] = -1
             self.storm_radius[i] = -1
 
+
     def read_imd(self, path, verbose=False):
         r"""Extract relevant hurricane data from IMD file
             and update storm fields with proper values.
@@ -507,8 +624,10 @@ class Storm(object):
 
         Return ValueError if format incorrect or if file not IMD.
         """
-        raise NotImplementedError(("Reading in IMD files is not implemented ",
-                                   "yet but is planned for a future release."))
+        raise NotImplementedError(("Reading in IMD files is not ",
+                                   "implemented yet but is planned for a ",
+                                   "future release."))
+
 
     def read_tcvitals(self, path, verbose=False):
         r"""Extract relevant hurricane data from TCVITALS file
@@ -520,123 +639,61 @@ class Storm(object):
 
         """
 
-        raise NotImplementedError(("Reading in TCVITALS files is not implemented",
-                                   "yet but is planned for a future release."))
+        # read in TCVitals_file
+        data_block = []
+        with open(path, 'r') as TCVitals_file:
+            data = TCVitals_file.readlines()
+            for line in data:
+                line = line.split()
+                line = [value.strip() for value in line]
+                data_block.append(line)
+        num_lines = len(data_block)
 
-        try:
-            import requests
-        except ImportError as e:
-            print("The 'requests' module is required to read TCVitals data.")
-            raise e
+        # Parse data block - convert to correct units
+        # Conversions:
+        #  max_wind_radius  - convert from km to m - 1000.0
+        #  Central_pressure - convert from mbar to Pa - 100.0
+        #  Radius of last isobar contour - convert from km to m - 1000.0
+        self.t = []
+        self.classification = numpy.empty(num_lines, dtype=str)
+        self.eye_location = numpy.empty((num_lines, 2))
+        self.max_wind_speed = numpy.empty(num_lines)
+        self.central_pressure = numpy.empty(num_lines)
+        self.max_wind_radius = numpy.empty(num_lines)
+        self.storm_radius = numpy.empty(num_lines)
+         
+        for (i, data) in enumerate(data_block):
+            # End at an empty lines - skips lines at the bottom of a file
+            if len(data) == 0:
+                break
 
-        try:
-            from bs4 import BeautifulSoup
-        except ImportError as e:
-            print("BeautfulSoup is required for reading in TCVitals data.")
-            raise e
-
-        if int(year) < 2011:
-            err_msg = "Years not contained on this page"
-            raise ValueError(err_msg)
-        else:
-            if int(year) == 2016:
-                file_directory_url = "".join((path))
+            # Grab data regarding basin and cyclone number if we are starting
+            if i == 0:
+                self.basin = TCVitals_Basins[data[1][2:]]
+                self.ID = int(data[1][:2])
+                   
+            # Create time
+            self.t.append(datetime.datetime(int(data[3][0:4]),
+                                            int(data[3][4:6]),
+                                            int(data[3][6:]),
+                                            int(data[4][:2])))
+            
+            # Parse eye location - longitude/latitude order
+            if data[5][-1] == 'N':
+                self.eye_location[i, 1] = float(data[5][0:-1])/10.0
             else:
-                file_directory_url = "".join((path, year, '/'))
-            print('File Directory URL:', file_directory_url)
-            storm_directory_page = requests.get(file_directory_url)
-            soup = BeautifulSoup(storm_directory_page.content,
-                                 'html.parser')
-            storm_directory_links = soup.find_all('a')
-            storm_files = []
-            for link in storm_directory_links:
-                if ".dat" in str(link):
-                    if "combined" in str(link):
-                        continue
-                    else:
-                        storm_files.append(str(link)[9:35])
+                self.eye_location[i, 1] = -float(data[5][0:-1])/10.0
+            if data[6][-1] == "E":
+                self.eye_location[i, 0] = float(data[6][0:-1])/10.0
+            else:
+                self.eye_location[i, 0] = -float(data[6][0:-1])/10.0
 
-            found = False
-            for data_file_name in storm_files:
-                data_file_url = "".join((file_directory_url,
-                                         data_file_name))
-                unpack = True
-                data_path = clawpack.clawutil.data.get_remote_file(
-                                              data_file_url, unpack=unpack)
-                with open(data_path, 'r') as data:
-                    for line in data:
-                        self.name = line.split()[2]
-                        if name.upper() == self.name.upper():
-                            found = True
-                            break
-                        else:
-                            continue
-                data.close()
+            # Intensity Information
+            self.max_wind_speed[i] = float(data[12])
+            self.central_pressure[i] = units.convert(float(data[9]), 'mbar', 'Pa')
+            self.max_wind_radius[i] = units.convert(float(data[13]), 'km', 'm')
+            self.storm_radius[i] = units.convert(float(data[11]), 'km', 'm')
 
-                if found:
-                    storm_file_url = data_file_url
-                    self.name = name.upper()
-                    print('Storm File URL', storm_file_url)
-                    os.remove(data_path)
-                    break
-                else:
-                    os.remove(data_path)
-                    continue
-
-            if not found:
-                return("Storm not found for the year you specified.")
-
-            storm_path = clawpack.clawutil.data.get_remote_file(
-                                               storm_file_url, unpack=True)
-
-            data_block = []
-            with open(storm_path, 'r') as tcvitals_file:
-                data_block = tcvitals_file.readlines()
-            print('data_block', data_block)
-
-            num_lines = len(data_block)
-
-            # Parse data block
-            self.t = []
-            self.event = numpy.empty(num_lines, dtype=str)
-            self.classification = numpy.empty(num_lines, dtype=str)
-            self.eye_location = numpy.empty((num_lines, 2))
-            self.max_wind_speed = numpy.empty(num_lines)
-            self.central_pressure = numpy.empty(num_lines)
-            self.max_wind_radius = numpy.empty(num_lines)
-            self.storm_radius = numpy.empty(num_lines)
-
-            len_data = []
-
-            for (i, line) in enumerate(data_block):
-                if len(line) == 0:
-                    break
-                data = [value.strip() for value in line.split()]
-
-                self.t.append(datetime.datetime(int(data[3][0:4]),
-                                                int(data[3][4:6]),
-                                                int(data[3][6:8]),
-                                                int(data[4][0:2]),
-                                                int(data[4][2:])))
-
-                self.event[i] = data[1][-1]
-                if self.event[i] == 'L':
-                    self.time_offset = self.t[i]
-
-                if data[5][-1] == 'N':
-                    self.eye_location[i, 0] = float(data[5][0:-1])/10
-                else:
-                    self.eye_location[i, 0] = -float(data[5][0:-1])/10
-                if data[6][-1] == "E":
-                    self.eye_location[i, 1] = float(data[6][0:-1])/10
-                else:
-                    self.eye_location[i, 1] = -float(data[6][0:-1])/10
-
-                # Intensity Information
-                self.max_wind_speed[i] = float(data[8])
-                self.central_pressure[i] = float(data[9])
-                self.max_wind_radius[i] = float(data[11])
-                self.storm_radius[i] = float(data[13])
 
     # =========================================================================
     # Write Routines
@@ -645,7 +702,7 @@ class Storm(object):
 
         :Input:
          - *path* (string) Path to data file.
-         - *file_format (string) Format of the data file.  See list of
+         - *file_format* (string) Format of the data file.  See list of
            supported formats for a list of valid strings.  Defaults to
            "geoclaw".
          - *kwargs* (dict) Keyword dictionary for additional arguments that can
@@ -1202,13 +1259,8 @@ def load_emanuel_storms(path, mask_distance=None, mask_coordinate=(0.0, 0.0),
         storm.eye_location[:, 0] = lon[n, :m]
         storm.eye_location[:, 1] = lat[n, :m]
         storm.max_wind_speed = max_wind_speed[n, :m]
-        for i in range(m):
-            max_wind_radius[n, i] = units.convert(max_wind_radius[n, i],
-                                                               'km', 'm')
-            central_pressure[n, i] = units.convert(central_pressure[n, i],  
-                                                               'hPa', 'Pa') 
-        storm.max_wind_radius = max_wind_radius[n, :m] 
-        storm.central_pressure = central_pressure[n, :m] 
+        storm.max_wind_radius = units.convert(max_wind_radius[n, :m], 'km', 'm')
+        storm.central_pressure = units.convert(central_pressure[n, :m], 'hPa', 'Pa')
         storm.storm_radius = numpy.ones(m) * 300e3
 
         include_storm = True
